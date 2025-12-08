@@ -19,7 +19,10 @@ public class UserService {
     /**
      * 使用者註冊
      */
-    public String register(RegisterRequest request) {
+    /**
+     * 使用者註冊 (含大頭貼)
+     */
+    public String register(RegisterRequest request, org.springframework.web.multipart.MultipartFile file) {
         // 1. 檢查帳號是否重複
         if (userRepository.existsByAccount(request.getAccount())) {
             return "帳號已存在";
@@ -28,13 +31,23 @@ public class UserService {
         // 2. 建立新使用者物件
         User user = new User();
         user.setAccount(request.getAccount());
-        
+
         // 注意：專題演示為方便直接存明碼，實務上必須加密 (如 BCrypt)
-        user.setPassword(request.getPassword()); 
-        
+        user.setPassword(request.getPassword());
+
         user.setStudentId(request.getStudentId());
         user.setDepartment(request.getDepartment());
         user.setRole("會員"); // 預設角色
+
+        // 處理大頭貼
+        if (file != null && !file.isEmpty()) {
+            try {
+                user.setUserPicture(file.getBytes());
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+                return "圖片處理失敗";
+            }
+        }
 
         userRepository.save(user);
         return "註冊成功";

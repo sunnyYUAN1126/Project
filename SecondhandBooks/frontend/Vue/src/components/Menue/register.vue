@@ -9,6 +9,11 @@ const department = ref("")
 const studentId = ref("")
 const password = ref("")
 const showPassword = ref(false)
+const selectedFile = ref(null)
+
+function handleFileChange(event) {
+  selectedFile.value = event.target.files[0]
+}
 
 async function handleRegister() {
   // 這裡可以先做一些基本檢查
@@ -18,24 +23,29 @@ async function handleRegister() {
   }
 
   try {
+    const formData = new FormData()
+    formData.append("account", username.value)
+    formData.append("password", password.value)
+    formData.append("studentId", studentId.value)
+    formData.append("department", department.value)
+    
+    if (selectedFile.value) {
+      formData.append("file", selectedFile.value)
+    }
+
+    // 注意：用 FormData 時，fetch 不用手動設定 Content-Type，瀏覽器會自己處理並加上 boundary
     const response = await fetch("http://localhost:8080/api/users/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        account: username.value,
-        password: password.value,
-        studentId: studentId.value,
-        department: department.value,
-      }),
+      body: formData,
     })
+
+    const data = await response.json().catch(() => ({}))
 
     if (response.ok) {
       alert("註冊成功！請登入。")
       emit("register-success")
     } else {
-      alert("註冊失敗，請稍後再試。")
+      alert(data.message || "註冊失敗，請稍後再試。")
     }
   } catch (error) {
     console.error("Registration error:", error)
@@ -75,6 +85,12 @@ async function handleRegister() {
     <span class="input-group-text d-flex justify-content-center align-items-center" style="width: 30%;">密碼</span>
     <input :type="showPassword ? 'text' : 'password'" class="form-control text-center" v-model="password" placeholder="Password">
   </div>
+  
+  <!-- 大頭貼 (選填) -->
+  <div class="input-group mb-4 mx-auto" style="width: 70%;">
+    <span class="input-group-text d-flex justify-content-center align-items-center" style="width: 30%;">大頭貼</span>
+    <input type="file" class="form-control" @change="handleFileChange" accept="image/*">
+  </div>
 
   <!-- 顯示密碼 -->
   <div class="mb-4 d-flex justify-content-center align-items-center">
@@ -96,7 +112,9 @@ async function handleRegister() {
     list-style: none;
 }
 .login_container{
-  margin: 200px;
+    /* margin: 200px;  這裡為了版面先註解掉，或可自行調整 */
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 
@@ -110,8 +128,4 @@ async function handleRegister() {
   background: black;
 
 }
-
-
-
-
 </style>

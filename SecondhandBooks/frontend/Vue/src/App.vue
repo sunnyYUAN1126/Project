@@ -79,7 +79,7 @@ function adminLogout() {
     <!-- Navbar -->
     <nav class="menu navbar  navbar-expand-lg fixed-top">
       <div class="logo" @click="showHomePage">二手書網站 <i class="bi bi-book"></i> </div>
-      <ul>
+      <ul class="menu_list">
         <li @click="showShoppingCartPage">購物車 <i class="bi bi-cart4"></i></li>
 
         <!-- 管理員登入時 -->
@@ -134,7 +134,6 @@ function adminLogout() {
   justify-content: space-between;
   align-items: center;
 }
-
 .App_container .logo {
   color: black;
   font-size: 50px;
@@ -149,7 +148,7 @@ function adminLogout() {
 
 .App_container ul {
   display: flex;
-  gap: 10px;
+  gap: 50px;
 }
 
 

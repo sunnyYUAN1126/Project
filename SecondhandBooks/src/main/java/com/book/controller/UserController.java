@@ -22,9 +22,13 @@ public class UserController {
     private UserService userService;
 
     // === 註冊 API ===
+    // === 註冊 API ===
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody RegisterRequest request) {
-        String result = userService.register(request);
+    public ResponseEntity<Map<String, String>> register(
+            @ModelAttribute RegisterRequest request,
+            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file) {
+
+        String result = userService.register(request, file);
         Map<String, String> response = new HashMap<>();
         response.put("message", result);
 
