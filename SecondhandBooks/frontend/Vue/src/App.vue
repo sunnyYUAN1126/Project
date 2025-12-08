@@ -16,6 +16,7 @@ const homeRef = ref(null)
 const isLoggedIn = ref(false)        // 一般會員登入
 const adminIsLoggedIn = ref(false)   // 管理員登入
 const userName = ref("")             // 使用者名稱
+const userPicture = ref("")          // 使用者圖片
 
 // ------------------------
 // 頁面切換方法
@@ -39,9 +40,10 @@ function showAdminHomePage() { currentPage.value = "adminHome" }
 // ------------------------
 // 使用者登入/登出
 // ------------------------
-function handleLoginSuccess(account) {
+function handleLoginSuccess(userData) {
   isLoggedIn.value = true
-  userName.value = account
+  userName.value = userData.account
+  userPicture.value = userData.userPicture || ""
   currentPage.value = "home"
 }
 async function logout() {
@@ -89,7 +91,10 @@ function adminLogout() {
         <!-- 一般會員登入時 -->
         <template v-else-if="isLoggedIn">
           <li @click="logout">登出</li>
-          <li @click="showMemberAreaPage">{{ userName }}</li>
+          <li @click="showMemberAreaPage" class="d-flex align-items-center">
+            <img v-if="userPicture" :src="userPicture" alt="User" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 8px; object-fit: cover;">
+            {{ userName }}
+          </li>
         </template>
 
         <!-- 都沒登入 -->

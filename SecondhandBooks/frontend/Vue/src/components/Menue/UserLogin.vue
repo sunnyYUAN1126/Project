@@ -28,7 +28,7 @@ async function handleLogin() {
         if (data.role === '管理員') {
           emit("admin-login-success")
         } else {
-          emit("login-success", data.account)
+          emit("login-success", data)
         }
       } else {
         alert("登入失敗，請檢查帳號密碼！")

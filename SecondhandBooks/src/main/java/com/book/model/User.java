@@ -32,6 +32,10 @@ public class User {
     @Column(columnDefinition = "ENUM('會員','管理員')")
     private String role = "會員"; // 預設值
 
+    @Lob
+    @Column(name = "user_picture", columnDefinition = "MEDIUMBLOB")
+    private byte[] userPicture;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

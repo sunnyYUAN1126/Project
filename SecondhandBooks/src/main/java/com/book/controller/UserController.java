@@ -27,7 +27,7 @@ public class UserController {
         String result = userService.register(request);
         Map<String, String> response = new HashMap<>();
         response.put("message", result);
-        
+
         if ("註冊成功".equals(result)) {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } else {
@@ -44,14 +44,19 @@ public class UserController {
             // 登入成功，將 user_id 存入 Session
             session.setAttribute("user_id", user.getUserId());
             session.setAttribute("role", user.getRole());
-            
+
             // 回傳給前端的資料 (不包含密碼)
             Map<String, Object> response = new HashMap<>();
             response.put("message", "登入成功");
             response.put("userId", user.getUserId());
             response.put("account", user.getAccount());
             response.put("role", user.getRole());
-            
+
+            if (user.getUserPicture() != null) {
+                String base64Image = java.util.Base64.getEncoder().encodeToString(user.getUserPicture());
+                response.put("userPicture", "data:image/jpeg;base64," + base64Image);
+            }
+
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "帳號或密碼錯誤"));
