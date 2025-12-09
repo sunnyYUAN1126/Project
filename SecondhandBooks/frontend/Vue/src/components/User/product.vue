@@ -9,11 +9,17 @@
             <th>ISBN</th>
             <th>書名</th>
             <th>分類</th>
-            <th>幾成新</th>
+            <th @click="setSort('condition')" style="cursor: pointer;">
+              幾成新 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'condition', 'text-secondary': currentSortField !== 'condition'}"></i>
+            </th>
             <th>有無筆記</th>
             <th>書況描述</th>
-            <th>上架日期</th>
-            <th>二手價</th>
+            <th @click="setSort('uploadTime')" style="cursor: pointer;">
+              上架日期 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'uploadTime', 'text-secondary': currentSortField !== 'uploadTime'}"></i>
+            </th>
+            <th @click="setSort('price')" style="cursor: pointer;">
+              二手價 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'price', 'text-secondary': currentSortField !== 'price'}"></i>
+            </th>
             <th>圖片</th>
             <th>管理員審核</th>
             <th>管理員備註</th>
@@ -91,11 +97,30 @@ const books = ref([
   { isbn: "9789861234566", title: "生物學概論", category: "醫學與健康類", condition: 9, notes: "無筆記", description: "近全新", uploadTime: "2025-07-15", price: 280, images: [], adminStatus: "審核通過", adminNote: "檢查封面及內頁" }
 ])
 
+const currentSortField = ref(null)
+
+function setSort(field) {
+  currentSortField.value = field
+}
+
 const sortedBooks = computed(() => {
-  return books.value.slice().sort((a, b) => {
-    const order = { "審核通過": 0, "待審核": 1, "審核不通過": 2 }
-    return order[a.adminStatus] - order[b.adminStatus]
-  })
+  const list = books.value.slice()
+  
+  if (currentSortField.value) {
+    list.sort((a, b) => {
+      // 針對數值或是日期都還是可以直接比大小 (字串日期 yyyy-mm-dd 可直接比)
+      if (a[currentSortField.value] > b[currentSortField.value]) return 1
+      if (a[currentSortField.value] < b[currentSortField.value]) return -1
+      return 0
+    })
+  } else {
+    // 預設排序：管理員狀態
+    list.sort((a, b) => {
+      const order = { "審核通過": 0, "待審核": 1, "審核不通過": 2 }
+      return order[a.adminStatus] - order[b.adminStatus]
+    })
+  }
+  return list
 })
 
 const previewImage = ref(null)

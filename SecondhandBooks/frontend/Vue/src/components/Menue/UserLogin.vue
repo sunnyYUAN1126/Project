@@ -6,7 +6,7 @@ const emit = defineEmits(["login-success", "login-Register", "admin-login-succes
 
 const username = ref("")
 const password = ref("")
-const showPassword = ref(false)
+
 
 async function handleLogin() {
   // 簡單模擬登入檢查
@@ -52,11 +52,7 @@ const catImg = ref("")
 // 頁面載入抓貓咪
 onMounted(async () => {
   try {
-    const res = await fetch('https://api.thecatapi.com/v1/images/search', {
-      headers: {
-        'x-api-key': 'live_AOITW0dIvWcHI7Vdu2FCkLf0zUiX5KpQkD2rMEGkz309q4cIgODvoVlJAAKFAc8L'
-      }
-    })
+    const res = await fetch('https://api.thecatapi.com/v1/images/search')
     const data = await res.json()
     catImg.value = data[0].url
   } catch (err) {
@@ -92,14 +88,10 @@ onMounted(async () => {
 
             <div class="input-group mb-3 mx-auto" style="width: 70%;">
               <span class="input-group-text d-flex justify-content-center align-items-center" style="width: 20%;">密碼</span>
-              <input :type="showPassword ? 'text' : 'password'" class="form-control text-center" v-model="password" placeholder="Password">
+              <input type="password" class="form-control text-center" v-model="password" placeholder="Password">
             </div>
 
-            <!-- 顯示密碼 -->
-            <div class="mb-3 d-flex justify-content-center align-items-center">
-                <input type="checkbox" id="showPwd" v-model="showPassword" class="form-check-input me-2">
-                <label for="showPwd" class="form-check-label">顯示密碼</label>
-            </div>
+
 
             <div class="my-2 d-flex justify-content-center">
               <button class="btn btn-primary" @click="handleLogin">登入</button>

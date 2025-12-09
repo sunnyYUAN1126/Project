@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 // ==========================================
 // 狀態變數
@@ -53,6 +53,34 @@ const fetchListings = async (isbn, name) => {
     selectedBookSellers.value = [];
   }
 };
+
+// ==========================================
+// 排序邏輯
+// ==========================================
+const currentSortField = ref(null)
+
+function setSort(field) {
+  currentSortField.value = field
+}
+
+// 根據 selectedBookSellers 產生排序後的清單
+const sortedProductList = computed(() => {
+  // 複製一份陣列以免改動到原始資料
+  const list = selectedBookSellers.value.slice()
+  
+  if (currentSortField.value) {
+    list.sort((a, b) => {
+      let valA = a[currentSortField.value]
+      let valB = b[currentSortField.value]
+
+      // 簡單的從小到大排序
+      if (valA > valB) return 1
+      if (valA < valB) return -1
+      return 0
+    })
+  }
+  return list
+})
 
 // ==========================================
 // 互動邏輯
@@ -186,17 +214,23 @@ defineExpose({
             <thead>
               <tr>
                 <th>賣家</th>
-                <th>書況等級</th>
+                <th @click="setSort('condition')" style="cursor: pointer;">
+                  書況等級 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'condition', 'text-secondary': currentSortField !== 'condition'}"></i>
+                </th>
                 <th>筆記狀況</th>
                 <th>賣家備註</th>
-                <th>上架日期</th>
-                <th>價格</th>
+                <th @click="setSort('createdAt')" style="cursor: pointer;">
+                  上架日期 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'createdAt', 'text-secondary': currentSortField !== 'createdAt'}"></i>
+                </th>
+                <th @click="setSort('price')" style="cursor: pointer;">
+                  價格 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'price', 'text-secondary': currentSortField !== 'price'}"></i>
+                </th>
                 <th>商品實拍</th>
                 <th>操作</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(product, index) in selectedBookSellers" :key="product.productId">
+              <tr v-for="(product, index) in sortedProductList" :key="product.productId">
                 <td>{{ product.sellerName }}</td>
                 <td><span class="badge bg-info text-dark">{{ product.condition }}</span></td>
                 <td>{{ product.status }}</td>

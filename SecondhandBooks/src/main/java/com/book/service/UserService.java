@@ -4,7 +4,6 @@ import com.book.dto.LoginRequest;
 import com.book.dto.RegisterRequest;
 import com.book.model.User;
 import com.book.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -8,7 +8,7 @@ const username = ref("")
 const department = ref("")
 const studentId = ref("")
 const password = ref("")
-const showPassword = ref(false)
+
 const selectedFile = ref(null)
 const previewUrl = ref(null) // 用於顯示預覽圖
 const fileInput = ref(null)  // 用於參照隱藏的 input
@@ -118,14 +118,10 @@ async function handleRegister() {
   <!-- 密碼 -->
   <div class="input-group mb-4  mx-auto" style="width: 70%;">
     <span class="input-group-text d-flex justify-content-center align-items-center" style="width: 30%;">密碼</span>
-    <input :type="showPassword ? 'text' : 'password'" class="form-control text-center" v-model="password" placeholder="Password">
+    <input type="password" class="form-control text-center" v-model="password" placeholder="Password">
   </div>
   
-  <!-- 顯示密碼 -->
-  <div class="mb-4 d-flex justify-content-center align-items-center">
-      <input type="checkbox" id="showPwd" v-model="showPassword" class="form-check-input me-2">
-      <label for="showPwd" class="form-check-label">顯示密碼</label>
-  </div>
+
 
   <!-- 註冊 -->
   <div class="mb-4 mt-4 d-flex justify-content-center align-items-center gap-2">
