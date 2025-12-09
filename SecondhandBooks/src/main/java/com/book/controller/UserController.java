@@ -15,7 +15,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*") // 允許前端跨域呼叫 (開發階段方便)
 public class UserController {
 
     @Autowired

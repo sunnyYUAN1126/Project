@@ -7,10 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.web.multipart.MultipartFile;
+import com.book.dto.AddBookRequest;
+import org.springframework.http.MediaType;
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = "*")
 public class BookController {
 
     @Autowired
@@ -33,5 +37,30 @@ public class BookController {
     public ResponseEntity<List<com.book.dto.BookListingDTO>> getBookListings(@PathVariable String isbn) {
         List<com.book.dto.BookListingDTO> listings = bookService.getBookListings(isbn);
         return ResponseEntity.ok(listings);
+    }
+
+    @PostMapping(value = "/add", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<Map<String, String>> addBook(
+            @ModelAttribute AddBookRequest request,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files,
+            HttpSession session) {
+
+        Object userIdObj = session.getAttribute("user_id");
+        if (userIdObj == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "請先登入"));
+        }
+        Long userId = Long.valueOf(userIdObj.toString());
+
+        try {
+            String result = bookService.addBook(request, files, userId);
+            if ("Book added successfully".equals(result)) {
+                return ResponseEntity.ok(Map.of("message", "新增成功"));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("message", result));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("message", "伺服器錯誤: " + e.getMessage()));
+        }
     }
 }

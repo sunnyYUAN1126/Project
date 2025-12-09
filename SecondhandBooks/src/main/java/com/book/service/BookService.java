@@ -15,6 +15,12 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
+    @Autowired
+    private com.book.repository.UserRepository userRepository;
+
+    @Autowired
+    private com.book.repository.ProductImageRepository productImageRepository;
+
     /**
      * Get books by category (or all if category is null/empty).
      * Sorts "上架" items first.
@@ -140,5 +146,71 @@ public class BookService {
                 .map(com.book.model.ProductImage::getImageUrl)
                 .collect(Collectors.toList()));
         return dto;
+    }
+
+    public String addBook(com.book.dto.AddBookRequest request,
+            java.util.List<org.springframework.web.multipart.MultipartFile> files, Long sellerId) {
+        // 1. Verify seller
+        com.book.model.User seller = userRepository.findById(sellerId).orElse(null);
+        if (seller == null) {
+            return "Seller not found";
+        }
+
+        // 2. Create Book entity
+        Book book = new Book();
+        book.setIsbn(request.getIsbn());
+        book.setName(request.getTitle());
+        book.setAuthor(request.getAuthor());
+        book.setPublisher(request.getPublisher());
+        book.setCategory(request.getCategory());
+        book.setProductNew(request.getCondition());
+        book.setProductClassNote(request.getNotes()); // "none", "few", "many" or whatever frontend sends
+        book.setProductNote(request.getDescription());
+        book.setPrice(request.getPrice());
+        book.setSeller(seller);
+        book.setShelfStatus("下架");
+        book.setAdminReview("待審核");
+        book.setStock(1); // Default to 1
+
+        Book savedBook = bookRepository.save(book);
+
+        // 3. Process files
+        if (files != null && !files.isEmpty()) {
+            String uploadDir = "D:/Project/picture/";
+            java.io.File dir = new java.io.File(uploadDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            int sortOrder = 1;
+            for (org.springframework.web.multipart.MultipartFile file : files) {
+                if (file.isEmpty())
+                    continue;
+                try {
+                    String originalFilename = file.getOriginalFilename();
+                    String extension = "";
+                    if (originalFilename != null && originalFilename.contains(".")) {
+                        extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+                    }
+                    String newFilename = java.util.UUID.randomUUID().toString() + extension;
+                    java.nio.file.Path path = java.nio.file.Paths.get(uploadDir + newFilename);
+                    java.nio.file.Files.copy(file.getInputStream(), path,
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                    com.book.model.ProductImage image = new com.book.model.ProductImage();
+                    image.setBook(savedBook);
+                    // Use the mapped URL
+                    image.setImageUrl("http://localhost:8080/images/" + newFilename);
+                    image.setSortOrder(sortOrder++);
+                    productImageRepository.save(image);
+
+                } catch (java.io.IOException e) {
+                    e.printStackTrace();
+                    return "Error saving file";
+                }
+            }
+        }
+
+        return "Book added successfully";
     }
 }

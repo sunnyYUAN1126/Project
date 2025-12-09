@@ -21,6 +21,7 @@ async function handleLogin() {
           account: username.value,
           password: password.value,
         }),
+        credentials: 'include', // 重要：確保 Session Cookie 被瀏覽器儲存
       })
 
       if (response.ok) {
@@ -110,12 +111,12 @@ onMounted(async () => {
 
 <style scoped>
 .backgroundALL{
-  margin-top: 90px;
+  margin-top: 95px;
 }
 
 .login_page {
   display: flex;
-  min-height: 100vh;
+  height: 600px;
   width: 100%;
 }
 
