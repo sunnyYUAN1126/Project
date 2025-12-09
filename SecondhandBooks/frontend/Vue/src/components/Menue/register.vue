@@ -10,9 +10,21 @@ const studentId = ref("")
 const password = ref("")
 const showPassword = ref(false)
 const selectedFile = ref(null)
+const previewUrl = ref(null) // 用於顯示預覽圖
+const fileInput = ref(null)  // 用於參照隱藏的 input
 
 function handleFileChange(event) {
-  selectedFile.value = event.target.files[0]
+  const file = event.target.files[0]
+  if (file) {
+    selectedFile.value = file
+    // 建立預覽圖連結
+    previewUrl.value = URL.createObjectURL(file)
+  }
+}
+
+// 觸發隱藏的檔案輸入框
+function triggerFileInput() {
+  fileInput.value.click()
 }
 
 async function handleRegister() {
@@ -62,8 +74,31 @@ async function handleRegister() {
     <h2 class="mb-0">註冊新帳號</h2>
   </div>
 
+  <!-- 大頭貼 (圓形 + 預設圖 + 加號) -->
+  <div class="mt-4 mb-2 d-flex justify-content-center">
+    <div class="profile-upload-container position-relative" @click="triggerFileInput">
+      <!-- 圓形顯示區 -->
+      <div class="profile-preview rounded-circle overflow-hidden d-flex justify-content-center align-items-center bg-light border">
+        <!-- 如果有選擇檔案，顯示預覽圖 -->
+        <img v-if="previewUrl" :src="previewUrl" alt="Profile Preview" class="w-100 h-100 object-fit-cover">
+        <!-- 否則顯示預設圖示 (Bootstrap Icon) -->
+        <i v-else class="bi bi-person-fill text-secondary" style="font-size: 5rem;"></i>
+      </div>
+      
+      <!-- 右下角加號按鈕 -->
+      <div class="upload-icon position-absolute bottom-0 end-0 bg-secondary rounded-circle d-flex justify-content-center align-items-center border border-white" style="width: 32px; height: 32px; color: white;">
+        <i class="bi bi-plus-lg"></i>
+      </div>
+
+      <!-- 隱藏的 input -->
+      <input type="file" ref="fileInput" class="d-none" @change="handleFileChange" accept="image/*">
+    </div>
+  </div>
+  <div class="text-secondary small mb-3">點擊上傳大頭貼</div>
+
+
   <!-- 帳號 -->
-  <div class="input-group mb-4 mt-4 mx-auto" style="width: 70%;">
+  <div class="input-group mb-4 mt-2 mx-auto" style="width: 70%;">
     <span class="input-group-text d-flex justify-content-center align-items-center" style="width: 30%;">帳號</span>
     <input type="text" class="form-control text-center" v-model="username" placeholder="Username">
   </div>
@@ -86,12 +121,6 @@ async function handleRegister() {
     <input :type="showPassword ? 'text' : 'password'" class="form-control text-center" v-model="password" placeholder="Password">
   </div>
   
-  <!-- 大頭貼 (選填) -->
-  <div class="input-group mb-4 mx-auto" style="width: 70%;">
-    <span class="input-group-text d-flex justify-content-center align-items-center" style="width: 30%;">大頭貼</span>
-    <input type="file" class="form-control" @change="handleFileChange" accept="image/*">
-  </div>
-
   <!-- 顯示密碼 -->
   <div class="mb-4 d-flex justify-content-center align-items-center">
       <input type="checkbox" id="showPwd" v-model="showPassword" class="form-check-input me-2">
@@ -112,9 +141,25 @@ async function handleRegister() {
     list-style: none;
 }
 .login_container{
-    /* margin: 200px;  這裡為了版面先註解掉，或可自行調整 */
-    margin-top: 50px;
+    margin-top: 100px;
     margin-bottom: 50px;
+}
+
+.profile-upload-container {
+  cursor: pointer;
+  width: 120px;
+  height: 120px;
+  transition: opacity 0.2s;
+}
+
+.profile-upload-container:hover {
+  opacity: 0.8;
+}
+
+.profile-preview {
+  width: 100%;
+  height: 100%;
+  border: 4px solid #f8f9fa; /* Optional: adds a slight border ring */
 }
 
 
