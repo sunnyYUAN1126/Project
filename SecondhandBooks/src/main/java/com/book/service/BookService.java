@@ -115,10 +115,8 @@ public class BookService {
         List<Book> allBooks = bookRepository.findByIsbnOrName(identifier, identifier);
 
         return allBooks.stream()
-                // .filter(b -> identifier.equals(b.getIsbn()) ||
-                // identifier.equals(b.getName())) // Handled by DB query now
-                .sorted(Comparator.comparing((Book b) -> "上架".equals(b.getShelfStatus()) ? 0 : 1)
-                        .thenComparing(Book::getPrice)) // Cheapest first?
+                .filter(b -> "上架".equals(b.getShelfStatus())) // Filter only on-shelf products
+                .sorted(Comparator.comparing(Book::getPrice)) // Sort by price
                 .map(this::convertToBookListingDTO)
                 .collect(Collectors.toList());
     }
