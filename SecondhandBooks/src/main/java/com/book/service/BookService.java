@@ -130,9 +130,15 @@ public class BookService {
     private com.book.dto.BookListingDTO convertToBookListingDTO(Book book) {
         com.book.dto.BookListingDTO dto = new com.book.dto.BookListingDTO();
         dto.setProductId(book.getProductId());
-        if (book.getSeller() != null) {
-            dto.setSellerName(book.getSeller().getAccount()); // Use account as name
+
+        // JDBC: Fetch user manually by ID
+        if (book.getSellerId() != null) {
+            String sellerName = userRepository.findById(book.getSellerId())
+                    .map(com.book.model.User::getAccount)
+                    .orElse("Unknown");
+            dto.setSellerName(sellerName);
         }
+
         dto.setCondition(book.getProductNew());
         dto.setNote(book.getProductNote());
         dto.setStatus(book.getProductClassNote()); // Mapping 'product_class_note' to 'status' (書況)
@@ -142,9 +148,13 @@ public class BookService {
         dto.setCreatedAt(book.getCreatedAt());
         dto.setShelfStatus(book.getShelfStatus());
 
-        dto.setImages(book.getImages().stream()
-                .map(com.book.model.ProductImage::getImageUrl)
-                .collect(Collectors.toList()));
+        if (book.getImages() != null) {
+            dto.setImages(book.getImages().stream()
+                    .map(com.book.model.ProductImage::getImageUrl)
+                    .collect(Collectors.toList()));
+        } else {
+            dto.setImages(java.util.Collections.emptyList());
+        }
         return dto;
     }
 
@@ -167,12 +177,13 @@ public class BookService {
         book.setProductClassNote(request.getNotes()); // "none", "few", "many" or whatever frontend sends
         book.setProductNote(request.getDescription());
         book.setPrice(request.getPrice());
-        book.setSeller(seller);
+        book.setSellerId(seller.getUserId()); // Set ID
         book.setShelfStatus("下架");
         book.setAdminReview("待審核");
         book.setStock(1); // Default to 1
 
-        Book savedBook = bookRepository.save(book);
+        // Initialize image list
+        java.util.SortedSet<com.book.model.ProductImage> images = new java.util.TreeSet<>();
 
         // 3. Process files
         if (files != null && !files.isEmpty()) {
@@ -198,11 +209,12 @@ public class BookService {
                             java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
                     com.book.model.ProductImage image = new com.book.model.ProductImage();
-                    image.setBook(savedBook);
+                    // Don't set book, it's an aggregate child
                     // Use the mapped URL
                     image.setImageUrl("http://localhost:8080/images/" + newFilename);
                     image.setSortOrder(sortOrder++);
-                    productImageRepository.save(image);
+
+                    images.add(image);
 
                 } catch (java.io.IOException e) {
                     e.printStackTrace();
@@ -210,6 +222,12 @@ public class BookService {
                 }
             }
         }
+
+        // Add images to book
+        book.setImages(images);
+
+        // Save Book (and cascades to images)
+        bookRepository.save(book);
 
         return "Book added successfully";
     }

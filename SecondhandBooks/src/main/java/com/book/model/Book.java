@@ -1,74 +1,80 @@
 package com.book.model;
 
-import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.MappedCollection;
+import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
-@Entity
-@Table(name = "products")
+@Table("products")
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
+    @Column("product_id")
     private Long productId;
 
-    // Many Books to One Seller (User)
-    @ManyToOne
-    @JoinColumn(name = "seller_id", nullable = false)
-    private User seller;
+    // JDBC: Reference by ID
+    @Column("seller_id")
+    private Long sellerId;
 
-    @Column(name = "book_ISBN")
+    @Column("book_ISBN")
     private String isbn;
 
-    @Column(name = "book_name", nullable = false)
+    @Column("book_name")
     private String name;
 
-    @Column(name = "category")
-    private String category; // '文學類','社會科學類','商業管理類','理工資訊類','醫學健康類'
+    @Column("category")
+    private String category;
 
-    @Column(name = "book_author")
+    @Column("book_author")
     private String author;
 
-    @Column(name = "book_publisher")
+    @Column("book_publisher")
     private String publisher;
 
-    @Column(name = "product_new")
-    private String productNew; // '九成','八成'...
+    @Column("product_new")
+    private String productNew;
 
-    @Column(name = "product_class_note")
-    private String productClassNote; // '無','少量筆記'...
+    @Column("product_class_note")
+    private String productClassNote;
 
-    @Column(name = "product_note", columnDefinition = "TEXT")
+    @Column("product_note")
     private String productNote;
 
-    @Column(name = "product_price", nullable = false)
+    @Column("product_price")
     private Integer price;
 
-    @Column(name = "product_stock")
+    @Column("product_stock")
     private Integer stock = 1;
 
-    @Column(name = "shelf_status")
-    private String shelfStatus = "下架"; // '上架','下架'
+    @Column("shelf_status")
+    private String shelfStatus = "下架";
 
-    @Column(name = "admin_review")
-    private String adminReview = "待審核"; // '待審核','審核通過','審核不通過'
+    @Column("admin_review")
+    private String adminReview = "待審核";
 
-    @Column(name = "admin_note", columnDefinition = "TEXT")
+    @Column("admin_note")
     private String adminNote;
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @CreatedDate
+    @Column("created_at")
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
+    @LastModifiedDate
+    @Column("updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.EAGER)
-    private java.util.List<ProductImage> images;
+    // JDBC One-to-Many
+    // idColumn is the Foreign Key in product_images table pointing to Book
+    // We use SortedSet to manually control the order via Comparable implementation
+    // in ProductImage
+    // and storing explicit values in 'sort_order' column.
+    @MappedCollection(idColumn = "product_id")
+    private java.util.SortedSet<ProductImage> images;
 }

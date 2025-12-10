@@ -1,27 +1,29 @@
 package com.book.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 
 @Data
-@Entity
-@Table(name = "product_images")
-public class ProductImage {
+@Table("product_images")
+public class ProductImage implements Comparable<ProductImage> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "image_id")
+    @Column("image_id")
     private Long imageId;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    @JsonIgnore // Prevent infinite recursion
-    private Book book;
-
-    @Column(name = "image_url")
+    @Column("image_url")
     private String imageUrl;
 
-    @Column(name = "sort_order")
+    @Column("sort_order")
     private Integer sortOrder;
+
+    @Override
+    public int compareTo(ProductImage other) {
+        return java.util.Comparator
+                .comparing(ProductImage::getSortOrder,
+                        java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder()))
+                .compare(this, other);
+    }
 }
