@@ -18,9 +18,6 @@ public class BookService {
     @Autowired
     private com.book.repository.UserRepository userRepository;
 
-    @Autowired
-    private com.book.repository.ProductImageRepository productImageRepository;
-
     /**
      * Get books by category (or all if category is null/empty).
      * Sorts "上架" items first.
@@ -48,63 +45,16 @@ public class BookService {
     /**
      * Get unique books grouped by ISBN (or Name if ISBN is missing).
      */
+    /**
+     * Get unique books grouped by ISBN.
+     * Uses efficient database aggregation via Spring Data JDBC.
+     */
     public List<com.book.dto.BookSummaryDTO> getUniqueBooks(String category) {
-        List<Book> allBooks = getBooks(category);
-
-        // Group by ISBN (or Name if ISBN is null/empty)
-        java.util.Map<String, List<Book>> groupedBooks = allBooks.stream()
-                .collect(Collectors.groupingBy(book -> {
-                    if (book.getIsbn() != null && !book.getIsbn().trim().isEmpty()) {
-                        return book.getIsbn();
-                    } else {
-                        return book.getName(); // Fallback to name
-                    }
-                }));
-
-        List<com.book.dto.BookSummaryDTO> summaries = new java.util.ArrayList<>();
-
-        for (java.util.Map.Entry<String, List<Book>> entry : groupedBooks.entrySet()) {
-            List<Book> group = entry.getValue();
-            if (group.isEmpty())
-                continue;
-
-            Book representative = group.get(0); // Use the first one for common details
-
-            com.book.dto.BookSummaryDTO dto = new com.book.dto.BookSummaryDTO();
-            dto.setIsbn(representative.getIsbn());
-            dto.setName(representative.getName());
-            dto.setAuthor(representative.getAuthor());
-            dto.setPublisher(representative.getPublisher());
-            dto.setCategory(representative.getCategory());
-
-            // Calculate stats from "上架" items only, or all?
-            // User wants to see available products.
-            List<Book> activeBooks = group.stream()
-                    .filter(b -> "上架".equals(b.getShelfStatus()))
-                    .collect(Collectors.toList());
-
-            if (activeBooks.isEmpty()) {
-                // If no active books, maybe show 0 stock and min price of inactive?
-                // Or just show stats from all.
-                dto.setTotalStock(0);
-                dto.setMinPrice(group.stream().mapToInt(Book::getPrice).min().orElse(0));
-            } else {
-                dto.setTotalStock(activeBooks.stream().mapToInt(b -> b.getStock() == null ? 0 : b.getStock()).sum());
-                dto.setMinPrice(activeBooks.stream().mapToInt(Book::getPrice).min().orElse(0));
-            }
-
-            // Find a cover image (first non-null image from any book in group)
-            String coverImage = group.stream()
-                    .flatMap(b -> b.getImages().stream())
-                    .map(com.book.model.ProductImage::getImageUrl)
-                    .findFirst()
-                    .orElse(null);
-            dto.setCoverImage(coverImage);
-
-            summaries.add(dto);
+        if (category == null || category.trim().isEmpty() || "ALL".equalsIgnoreCase(category)) {
+            return bookRepository.findBookSummaries();
+        } else {
+            return bookRepository.findBookSummariesByCategory(category);
         }
-
-        return summaries;
     }
 
     /**
