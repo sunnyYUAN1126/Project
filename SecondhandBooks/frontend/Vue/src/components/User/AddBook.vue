@@ -91,33 +91,44 @@
           </div>
         </div>
 
-        <!-- 圖片上傳 -->
+        <!-- 圖片上傳 (3個框框) -->
         <div class="mb-3">
-          <label class="form-label">上傳圖片（至少1張，最多4張）：</label>
-          <input type="file" @change="handleFiles" accept="image/*" multiple />
-        </div>
-
-        <!-- 圖片預覽 -->
-        <div class="mb-3 d-flex gap-3 flex-wrap">
-          <div
-            v-for="(img, index) in imagePreviews"
-            :key="index"
-            class="position-relative"
-          >
-            <img
-              :src="img"
-              alt="preview"
-              class="border rounded"
-              style="width:120px; height:120px; object-fit:cover;"
-            />
-            <button
-              type="button"
-              @click="removeImage(index)"
-              class="btn btn-sm btn-danger position-absolute"
-              style="top:0; right:0;"
+          <label class="form-label d-block text-center mb-3 text-black">上傳圖片（至少1張，第1張必需為封面）</label>
+          <div class="d-flex justify-content-center gap-3">
+            <div 
+              v-for="i in 3" 
+              :key="i" 
+              class="upload-box" 
+              @click="triggerUpload(i-1)"
             >
-              ×
-            </button>
+              <!-- 顯示預覽圖或加號 -->
+              <img 
+                v-if="imagePreviews[i-1]" 
+                :src="imagePreviews[i-1]" 
+                class="w-100 h-100 object-fit-cover rounded" 
+              />
+              <div v-else class="plus-icon">
+                <i class="bi bi-plus-lg fs-1 text-secondary"></i>
+              </div>
+
+              <!-- 隱藏的 input，每個框對應一個 -->
+              <!-- 加上 :id 是為了方便 debug 或擴充，實際上用 ref 陣列控制 -->
+              <input 
+                type="file" 
+                class="d-none" 
+                :ref="el => fileInputs[i-1] = el" 
+                @change="(e) => handleFileChange(e, i-1)" 
+                accept="image/*"
+              />
+
+              <!-- 刪除按鈕 (只有當有圖片時顯示) -->
+              <button 
+                v-if="imagePreviews[i-1]" 
+                type="button" 
+                class="btn-close position-absolute top-0 end-0 m-1 bg-white p-2" 
+                @click.stop="removeImage(i-1)"
+              ></button>
+            </div>
           </div>
         </div>
 
@@ -149,28 +160,35 @@ const form = reactive({
   quantity: 1
 })
 
-const images = ref([])
-const imagePreviews = ref([])
+const images = ref([null, null, null])
+const imagePreviews = ref([null, null, null])
+const fileInputs = ref([])
 
-function handleFiles(e) {
-  const files = Array.from(e.target.files)
-  for (let file of files) {
-    if (images.value.length >= 4) {
-      alert("最多只能上傳4張圖片！")
-      break
-    }
-    images.value.push(file)
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      imagePreviews.value.push(event.target.result)
-    }
-    reader.readAsDataURL(file)
+function triggerUpload(index) {
+  // 觸發對應的 input click
+  if (fileInputs.value[index]) {
+    fileInputs.value[index].click()
   }
 }
 
+function handleFileChange(e, index) {
+  const file = e.target.files[0]
+  if (!file) return
+
+  images.value[index] = file
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    imagePreviews.value[index] = event.target.result
+  }
+  reader.readAsDataURL(file)
+  
+  // 清空 input value 以便重複選擇同一檔案觸發 change
+  e.target.value = ''
+}
+
 function removeImage(index) {
-  images.value.splice(index, 1)
-  imagePreviews.value.splice(index, 1)
+  images.value[index] = null
+  imagePreviews.value[index] = null
 }
 
 async function submitBook() {
@@ -184,9 +202,18 @@ async function submitBook() {
     return
   }
 
-  if (images.value.length === 0) {
+  // Check if at least one image exists
+  const hasImage = images.value.some(img => img !== null)
+  if (!hasImage) {
     alert("請至少上傳一張圖片！")
     return
+  }
+  
+  // Check if first image (cover) exists - optionally enforce index 0 as cover, 
+  // or just check if *any* image exists. The UI says "第1張必需為封面", so let's enforce index 0.
+  if (!images.value[0]) {
+     alert("第1張圖片（封面）為必填！")
+     return
   }
 
   // 建構 FormData
@@ -203,8 +230,11 @@ async function submitBook() {
   formData.append("price", form.price)
   
   // Append files
+  // Append files
   for (let file of images.value) {
-    formData.append("files", file)
+    if (file) {
+      formData.append("files", file)
+    }
   }
 
   try {
@@ -226,8 +256,8 @@ async function submitBook() {
       // Redirect or clear form
       // router.push("/shop") // Example
       // Reset form
-       images.value = []
-       imagePreviews.value = []
+       images.value = [null, null, null]
+       imagePreviews.value = [null, null, null]
        Object.assign(form, {
          isbn: "",
          title: "",
@@ -259,6 +289,33 @@ async function submitBook() {
   position: relative;
 }
 .bg-light-gray {
-  background-color: #f2f2f2;
+  background-color: #ffffff;
+}
+
+.upload-box {
+  width: 150px;
+  height: 150px;
+  border: 4px dashed #999; /* 虛線邊框 */
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.upload-box:hover {
+  background-color: #e9ecef;
+  border-color: #666;
+}
+
+.plus-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
 }
 </style>
