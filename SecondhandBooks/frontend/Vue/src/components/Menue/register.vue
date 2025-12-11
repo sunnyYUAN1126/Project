@@ -9,6 +9,12 @@ const department = ref("")
 const studentId = ref("")
 const password = ref("")
 
+// 控制密碼顯示/隱藏
+const showPassword = ref(false)
+function togglePassword() {
+  showPassword.value = !showPassword.value
+}
+
 const selectedFile = ref(null)
 const previewUrl = ref(null) // 用於顯示預覽圖
 const fileInput = ref(null)  // 用於參照隱藏的 input
@@ -118,7 +124,21 @@ async function handleRegister() {
   <!-- 密碼 -->
   <div class="input-group mb-4  mx-auto" style="width: 70%;">
     <span class="input-group-text d-flex justify-content-center align-items-center" style="width: 30%;">密碼</span>
-    <input type="password" class="form-control text-center" v-model="password" placeholder="Password">
+    <div class="flex-grow-1 position-relative">
+      <input 
+        :type="showPassword ? 'text' : 'password'" 
+        class="form-control text-center rounded-end" 
+        v-model="password" 
+        placeholder="Password"
+        style="border-top-left-radius: 0; border-bottom-left-radius: 0; padding-right: 40px;"
+      >
+      <i 
+        :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'" 
+        class="position-absolute top-50 end-0 translate-middle-y me-3 text-secondary"
+        @click="togglePassword"
+        style="cursor: pointer; z-index: 10;"
+      ></i>
+    </div>
   </div>
   
 

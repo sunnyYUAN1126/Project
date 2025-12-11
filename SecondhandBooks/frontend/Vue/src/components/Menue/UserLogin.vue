@@ -7,6 +7,12 @@ const emit = defineEmits(["login-success", "login-Register", "admin-login-succes
 const username = ref("")
 const password = ref("")
 
+// 控制密碼顯示/隱藏
+const showPassword = ref(false)
+function togglePassword() {
+  showPassword.value = !showPassword.value
+}
+
 
 async function handleLogin() {
   // 簡單模擬登入檢查
@@ -89,7 +95,21 @@ onMounted(async () => {
 
             <div class="input-group mb-3 mx-auto" style="width: 70%;">
               <span class="input-group-text d-flex justify-content-center align-items-center" style="width: 20%;">密碼</span>
-              <input type="password" class="form-control text-center" v-model="password" placeholder="Password">
+              <div class="flex-grow-1 position-relative">
+                <input 
+                  :type="showPassword ? 'text' : 'password'" 
+                  class="form-control text-center rounded-end" 
+                  v-model="password" 
+                  placeholder="Password"
+                  style="border-top-left-radius: 0; border-bottom-left-radius: 0; padding-right: 40px;"
+                >
+                <i 
+                  :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'" 
+                  class="position-absolute top-50 end-0 translate-middle-y me-3 text-secondary"
+                  @click="togglePassword"
+                  style="cursor: pointer; z-index: 10;"
+                ></i>
+              </div>
             </div>
 
 

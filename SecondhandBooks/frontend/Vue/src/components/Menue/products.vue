@@ -234,7 +234,7 @@ defineExpose({
                 <td>{{ product.sellerName }}</td>
                 <td><span class="badge bg-info text-dark">{{ product.condition }}</span></td>
                 <td>{{ product.status }}</td>
-                <td style="max-width: 150px;" class="text-truncate" :title="product.note">{{ product.note || '無' }}</td>
+                <td style="max-width: 200px; white-space: pre-wrap;">{{ product.note || '無' }}</td>
                 <td>{{ product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'N/A' }}</td>
                 <td class="fw-bold text-danger">{{ product.price }}元</td>
 
