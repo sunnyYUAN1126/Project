@@ -21,20 +21,20 @@ public class BookController {
     private BookService bookService;
 
     @GetMapping
-    public ResponseEntity<List<Book>> getBooks(@RequestParam(required = false) String category) {
+    public ResponseEntity<List<Book>> getBooks(@RequestParam(name = "category", required = false) String category) {
         List<Book> books = bookService.getBooks(category);
         return ResponseEntity.ok(books);
     }
 
     @GetMapping("/unique")
     public ResponseEntity<List<com.book.dto.BookSummaryDTO>> getUniqueBooks(
-            @RequestParam(required = false) String category) {
+            @RequestParam(name = "category", required = false) String category) {
         List<com.book.dto.BookSummaryDTO> books = bookService.getUniqueBooks(category);
         return ResponseEntity.ok(books);
     }
 
     @GetMapping("/listings/{isbn}")
-    public ResponseEntity<List<com.book.dto.BookListingDTO>> getBookListings(@PathVariable String isbn) {
+    public ResponseEntity<List<com.book.dto.BookListingDTO>> getBookListings(@PathVariable("isbn") String isbn) {
         List<com.book.dto.BookListingDTO> listings = bookService.getBookListings(isbn);
         return ResponseEntity.ok(listings);
     }

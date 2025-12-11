@@ -50,11 +50,37 @@ public class BookService {
      * Uses efficient database aggregation via Spring Data JDBC.
      */
     public List<com.book.dto.BookSummaryDTO> getUniqueBooks(String category) {
+        List<com.book.dto.BookSummaryDTO> details;
+        List<com.book.dto.BookStockDTO> stocks;
+
         if (category == null || category.trim().isEmpty() || "ALL".equalsIgnoreCase(category)) {
-            return bookRepository.findBookSummaries();
+            details = bookRepository.findAllBookDetails();
+            stocks = bookRepository.findAllStocks();
         } else {
-            return bookRepository.findBookSummariesByCategory(category);
+            details = bookRepository.findBookDetailsByCategory(category);
+            stocks = bookRepository.findStocksByCategory(category);
         }
+
+        // Create a map for quick stock lookup by ISBN
+        java.util.Map<String, Integer> stockMap = stocks.stream()
+                .collect(Collectors.toMap(
+                        com.book.dto.BookStockDTO::getIsbn,
+                        dto -> dto.getTotalStock().intValue(), // Convert Long to Integer
+                        (existing, replacement) -> existing // In case of duplicate ISBNs (shouldn't happen with GROUP
+                                                            // BY)
+                ));
+
+        // Merge stock info into details
+        for (com.book.dto.BookSummaryDTO detail : details) {
+            String isbn = detail.getIsbn();
+            if (isbn != null && stockMap.containsKey(isbn)) {
+                detail.setTotalStock(stockMap.get(isbn));
+            } else {
+                detail.setTotalStock(0);
+            }
+        }
+
+        return details;
     }
 
     /**

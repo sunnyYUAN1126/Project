@@ -25,66 +25,71 @@ public interface BookRepository extends ListCrudRepository<Book, Long> {
     @Query("""
                 SELECT *
                 FROM products
-                WHERE (book_ISBN = :identifier OR book_name = :identifier) AND shelf_status = '上架'
+                WHERE book_ISBN = :identifier AND shelf_status = '上架'
                 ORDER BY product_price ASC
             """)
 
     List<Book> findListings(@Param("identifier") String identifier);
 
+    // === New Separated Queries ===
+
+    // 1. Stock Queries
     @Query("""
-                SELECT
-                    b.book_ISBN as isbn,
-                    MIN(b.book_name) as name,
-                    MIN(b.book_author) as author,
-                    MIN(b.book_publisher) as publisher,
-                    MIN(b.category) as category,
-                    MIN(b.product_price) as min_price,
-                    MAX(stock_agg.total_stock) as total_stock,
-                    (SELECT pi.image_url
-                     FROM product_images pi
-                     JOIN products p2 ON pi.product_id = p2.product_id
-                     WHERE p2.book_ISBN = b.book_ISBN
-                       AND p2.product_price = MIN(b.product_price)
-                       AND p2.shelf_status = '上架'
-                     LIMIT 1) as cover_image
-                FROM products b
-                JOIN (
-                    SELECT book_ISBN, MIN(product_price) as min_price, SUM(product_stock) as total_stock
-                    FROM products
-                    WHERE shelf_status = '上架'
-                    GROUP BY book_ISBN
-                ) stock_agg ON b.book_ISBN = stock_agg.book_ISBN AND b.product_price = stock_agg.min_price
-                WHERE b.shelf_status = '上架'
-                GROUP BY b.book_ISBN
+            SELECT book_ISBN as isbn, SUM(product_stock) as total_stock
+            FROM products
+            WHERE shelf_status = '上架'
+            GROUP BY book_ISBN
             """)
-    List<BookSummaryDTO> findBookSummaries();
+    List<com.book.dto.BookStockDTO> findAllStocks();
 
     @Query("""
-                SELECT
-                    b.book_ISBN as isbn,
-                    MIN(b.book_name) as name,
-                    MIN(b.book_author) as author,
-                    MIN(b.book_publisher) as publisher,
-                    MIN(b.category) as category,
-                    MIN(b.product_price) as min_price,
-                    MAX(stock_agg.total_stock) as total_stock,
-                    (SELECT pi.image_url
-                     FROM product_images pi
-                     JOIN products p2 ON pi.product_id = p2.product_id
-                     WHERE p2.book_ISBN = b.book_ISBN
-                       AND p2.product_price = MIN(b.product_price)
-                       AND p2.shelf_status = '上架'
-                     LIMIT 1) as cover_image
-                FROM products as b
-                JOIN (
-                    SELECT book_ISBN, MIN(product_price) as min_price, SUM(product_stock) as total_stock
-                    FROM products
-                    WHERE shelf_status = '上架' AND category = :category
-                    GROUP BY book_ISBN
-                ) as stock_agg
-                ON b.book_ISBN = stock_agg.book_ISBN AND b.product_price = stock_agg.min_price
-                WHERE b.shelf_status = '上架' AND b.category = :category
-                GROUP BY b.book_ISBN
+            SELECT book_ISBN as isbn, SUM(product_stock) as total_stock
+            FROM products
+            WHERE shelf_status = '上架' AND category = :category
+            GROUP BY book_ISBN
             """)
-    List<BookSummaryDTO> findBookSummariesByCategory(String category);
+    List<com.book.dto.BookStockDTO> findStocksByCategory(@Param("category") String category);
+
+    // 2. Detail Queries (ISBN + Min Price)
+    @Query("""
+            SELECT
+                b.book_ISBN as isbn,
+                MIN(b.book_name) as name,
+                MIN(b.book_author) as author,
+                MIN(b.book_publisher) as publisher,
+                MIN(b.category) as category,
+                MIN(b.product_price) as min_price,
+                (SELECT pi.image_url
+                 FROM product_images pi
+                 JOIN products p2 ON pi.product_id = p2.product_id
+                 WHERE p2.book_ISBN = b.book_ISBN
+                   AND p2.product_price = MIN(b.product_price)
+                   AND p2.shelf_status = '上架'
+                 LIMIT 1) as cover_image
+            FROM products b
+            WHERE b.shelf_status = '上架'
+            GROUP BY b.book_ISBN
+            """)
+    List<BookSummaryDTO> findAllBookDetails();
+
+    @Query("""
+            SELECT
+                b.book_ISBN as isbn,
+                MIN(b.book_name) as name,
+                MIN(b.book_author) as author,
+                MIN(b.book_publisher) as publisher,
+                MIN(b.category) as category,
+                MIN(b.product_price) as min_price,
+                (SELECT pi.image_url
+                 FROM product_images pi
+                 JOIN products p2 ON pi.product_id = p2.product_id
+                 WHERE p2.book_ISBN = b.book_ISBN
+                   AND p2.product_price = MIN(b.product_price)
+                   AND p2.shelf_status = '上架'
+                 LIMIT 1) as cover_image
+            FROM products b
+            WHERE b.shelf_status = '上架' AND b.category = :category
+            GROUP BY b.book_ISBN
+            """)
+    List<BookSummaryDTO> findBookDetailsByCategory(@Param("category") String category);
 }
