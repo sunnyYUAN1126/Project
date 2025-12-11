@@ -81,6 +81,15 @@ import axios from "axios"
 
 const books = ref([])
 
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}/${m}/${d}`
+}
+
 const fetchPendingBooks = async () => {
   try {
     const response = await axios.get("http://localhost:8080/api/books/pending", {
@@ -89,11 +98,7 @@ const fetchPendingBooks = async () => {
     // Map backend response using DTO/Entity fields to frontend display fields
     books.value = response.data.map(book => ({
       id: book.productId,
-      user: book.sellerId, // Note: This shows ID, better if we fetch username but Entity has sellerId.
-                           // Improving: We might want to fetch seller info or just show ID for now.
-                           // Given time constraints/complexity, let's show ID or try to resolve.
-                           // Actually Book entity only has sellerId. Seller name is not in Book.
-                           // For now, display ID.
+      user: book.sellerAccount,
       isbn: book.isbn,
       title: book.name,
       author: book.author,
@@ -106,9 +111,9 @@ const fetchPendingBooks = async () => {
                                     // In Book.java: productClassNote -> "有無筆記" (based on AddBook logic usually)
                                     // Let's assume productClassNote is notes, productNote is status/description.
       status: book.productNote,
-      date: book.createdAt,
+      date: formatDate(book.createdAt),
       price: book.price,
-      images: book.images ? book.images.map(img => img.imageUrl) : [],
+      images: book.images || [],
       adminNote: book.adminNote || ""
     }))
   } catch (error) {

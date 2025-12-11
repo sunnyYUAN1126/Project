@@ -67,12 +67,11 @@ public class BookService {
      * Let's support searching by ISBN first.
      */
     public List<com.book.dto.BookListingDTO> getBookListings(String identifier) {
-        // We need to find books where ISBN = identifier OR Name = identifier
-        List<Book> allBooks = bookRepository.findByIsbnOrName(identifier, identifier);
+        // Use DB sorting and filtering
+        List<Book> allBooks = bookRepository.findListings(identifier);
 
         return allBooks.stream()
-                .filter(b -> "上架".equals(b.getShelfStatus())) // Filter only on-shelf products
-                .sorted(Comparator.comparing(Book::getPrice)) // Sort by price
+                // .filter and .sorted are now handled by DB
                 .map(this::convertToBookListingDTO)
                 .collect(Collectors.toList());
     }
@@ -182,8 +181,46 @@ public class BookService {
         return "Book added successfully";
     }
 
-    public List<Book> getPendingBooks() {
-        return bookRepository.findByAdminReview("待審核");
+    public List<com.book.dto.BookReviewDTO> getPendingBooks() {
+        List<Book> books = bookRepository.findByAdminReview("待審核");
+        return books.stream()
+                .map(this::convertToBookReviewDTO)
+                .collect(Collectors.toList());
+    }
+
+    private com.book.dto.BookReviewDTO convertToBookReviewDTO(Book book) {
+        com.book.dto.BookReviewDTO dto = new com.book.dto.BookReviewDTO();
+        dto.setProductId(book.getProductId());
+        dto.setSellerId(book.getSellerId());
+
+        if (book.getSellerId() != null) {
+            String sellerAccount = userRepository.findById(book.getSellerId())
+                    .map(com.book.model.User::getAccount)
+                    .orElse("Unknown");
+            dto.setSellerAccount(sellerAccount);
+        }
+
+        dto.setIsbn(book.getIsbn());
+        dto.setName(book.getName());
+        dto.setAuthor(book.getAuthor());
+        dto.setPublisher(book.getPublisher());
+        dto.setCategory(book.getCategory());
+        dto.setProductNew(book.getProductNew());
+        dto.setProductClassNote(book.getProductClassNote());
+        dto.setProductNote(book.getProductNote());
+        dto.setPrice(book.getPrice());
+        dto.setCreatedAt(book.getCreatedAt());
+        dto.setAdminNote(book.getAdminNote());
+
+        if (book.getImages() != null) {
+            dto.setImages(book.getImages().stream()
+                    .map(com.book.model.ProductImage::getImageUrl)
+                    .collect(Collectors.toList()));
+        } else {
+            dto.setImages(java.util.Collections.emptyList());
+        }
+
+        return dto;
     }
 
     public String reviewBook(Long bookId, boolean isApproved, String note) {

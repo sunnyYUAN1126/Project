@@ -65,7 +65,7 @@ public class BookController {
     }
 
     @GetMapping("/pending")
-    public ResponseEntity<List<Book>> getPendingBooks(HttpSession session) {
+    public ResponseEntity<List<com.book.dto.BookReviewDTO>> getPendingBooks(HttpSession session) {
         // Basic check for admin role (in a real app, use Spring Security)
         // For now, checks if user is logged in. Better: check DB for role "管理員"
         // But session only has user_id, need to fetch user or trust session if we

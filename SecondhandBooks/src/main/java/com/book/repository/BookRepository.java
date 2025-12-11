@@ -7,6 +7,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface BookRepository extends ListCrudRepository<Book, Long> {
@@ -20,6 +21,15 @@ public interface BookRepository extends ListCrudRepository<Book, Long> {
 
     // Match DB Enum: '待審核'
     List<Book> findByAdminReview(String adminReview);
+
+    @Query("""
+                SELECT *
+                FROM products
+                WHERE (book_ISBN = :identifier OR book_name = :identifier) AND shelf_status = '上架'
+                ORDER BY product_price ASC
+            """)
+
+    List<Book> findListings(@Param("identifier") String identifier);
 
     @Query("""
                 SELECT
