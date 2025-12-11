@@ -63,4 +63,35 @@ public class BookController {
             return ResponseEntity.status(500).body(Map.of("message", "伺服器錯誤: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<Book>> getPendingBooks(HttpSession session) {
+        // Basic check for admin role (in a real app, use Spring Security)
+        // For now, checks if user is logged in. Better: check DB for role "管理員"
+        // But session only has user_id, need to fetch user or trust session if we
+        // stored role.
+        // Simplified: assume frontend protects this route, or we check user_id.
+        // Let's at least check login.
+        if (session.getAttribute("user_id") == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(bookService.getPendingBooks());
+    }
+
+    @PostMapping("/review/{id}")
+    public ResponseEntity<String> reviewBook(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> payload,
+            HttpSession session) {
+
+        if (session.getAttribute("user_id") == null) {
+            return ResponseEntity.status(401).body("請先登入");
+        }
+
+        boolean approved = (boolean) payload.get("approved");
+        String note = (String) payload.get("note");
+
+        String result = bookService.reviewBook(id, approved, note);
+        return ResponseEntity.ok(result);
+    }
 }

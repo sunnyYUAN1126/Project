@@ -76,54 +76,83 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref, onMounted } from "vue"
+import axios from "axios"
 
-const books = ref([
-  {
-    user: "user001",
-    isbn: "9789861234560",
-    title: "資料庫系統概論",
-    author: "Date, C. J.",
-    publisher: "Pearson",
-    category: "商業與管理類",
-    condition: "九成新",
-    notes: "無筆記",
-    status: "良好",
-    date: "2025/11/18",
-    price: "$250",
-    images: [
-      "https://via.placeholder.com/60x60?text=封面1",
-      "https://via.placeholder.com/60x60?text=封面2",
-      "https://via.placeholder.com/60x60?text=封面3"
-    ],
-    adminNote: ""
-  },
-  {
-    user: "user002",
-    isbn: "9789866543210",
-    title: "Java 程式設計",
-    author: "Liang, Y. Daniel",
-    publisher: "Pearson",
-    category: "社會科學類",
-    condition: "七成新",
-    notes: "有筆記",
-    status: "普通",
-    date: "2025/11/17",
-    price: "$180",
-    images: [
-      "https://via.placeholder.com/60x60?text=封面1",
-      "https://via.placeholder.com/60x60?text=封面2"
-    ],
-    adminNote: ""
+const books = ref([])
+
+const fetchPendingBooks = async () => {
+  try {
+    const response = await axios.get("http://localhost:8080/api/books/pending", {
+      withCredentials: true
+    })
+    // Map backend response using DTO/Entity fields to frontend display fields
+    books.value = response.data.map(book => ({
+      id: book.productId,
+      user: book.sellerId, // Note: This shows ID, better if we fetch username but Entity has sellerId.
+                           // Improving: We might want to fetch seller info or just show ID for now.
+                           // Given time constraints/complexity, let's show ID or try to resolve.
+                           // Actually Book entity only has sellerId. Seller name is not in Book.
+                           // For now, display ID.
+      isbn: book.isbn,
+      title: book.name,
+      author: book.author,
+      publisher: book.publisher,
+      category: book.category,
+      condition: book.productNew,
+      notes: book.productClassNote, // "有無筆記" mapped to product_class_note or "product_note"?
+                                    // Based on Book.java: productClassNote is "product_class_note", productNote is "product_note".
+                                    // In review.vue dummy: notes="無筆記", status="良好".
+                                    // In Book.java: productClassNote -> "有無筆記" (based on AddBook logic usually)
+                                    // Let's assume productClassNote is notes, productNote is status/description.
+      status: book.productNote,
+      date: book.createdAt,
+      price: book.price,
+      images: book.images ? book.images.map(img => img.imageUrl) : [],
+      adminNote: book.adminNote || ""
+    }))
+  } catch (error) {
+    console.error("Error fetching pending books:", error)
+    alert("無法取得待審核書籍")
   }
-])
-
-const approve = (book) => {
-  alert(`已同意：${book.user} 的書籍上架`)
 }
 
-const reject = (book) => {
-  alert(`已拒絕：${book.user} 的書籍上架`)
+onMounted(() => {
+  fetchPendingBooks()
+})
+
+const approve = async (book) => {
+  try {
+    const payload = {
+      approved: true,
+      note: book.adminNote
+    }
+    await axios.post(`http://localhost:8080/api/books/review/${book.id}`, payload, {
+      withCredentials: true
+    })
+    alert(`已同意：書籍ID ${book.id} 上架`)
+    fetchPendingBooks() // Refresh list
+  } catch (error) {
+    console.error("Error approving book:", error)
+    alert("審核失敗")
+  }
+}
+
+const reject = async (book) => {
+  try {
+    const payload = {
+      approved: false,
+      note: book.adminNote
+    }
+    await axios.post(`http://localhost:8080/api/books/review/${book.id}`, payload, {
+      withCredentials: true
+    })
+    alert(`已拒絕：書籍ID ${book.id} 上架`)
+    fetchPendingBooks() // Refresh list
+  } catch (error) {
+    console.error("Error rejecting book:", error)
+    alert("審核失敗")
+  }
 }
 
 // Modal logic

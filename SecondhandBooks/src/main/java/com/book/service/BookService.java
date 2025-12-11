@@ -181,4 +181,30 @@ public class BookService {
 
         return "Book added successfully";
     }
+
+    public List<Book> getPendingBooks() {
+        return bookRepository.findByAdminReview("待審核");
+    }
+
+    public String reviewBook(Long bookId, boolean isApproved, String note) {
+        return bookRepository.findById(bookId).map(book -> {
+            if (isApproved) {
+                // DB Enum: '審核通過'
+                book.setAdminReview("審核通過");
+                book.setShelfStatus("上架");
+            } else {
+                // DB Enum: '審核不通過'
+                book.setAdminReview("審核不通過");
+                book.setShelfStatus("下架");
+            }
+            book.setAdminNote(note);
+            // Since we are updating, we should update updatedAt if using auditing, but JDBC
+            // auditing handles it.
+            // If not, we might need manual update: book.setUpdatedAt(LocalDateTime.now());
+            // Based on Book.java existing annotations (@LastModifiedDate), it should handle
+            // it.
+            bookRepository.save(book);
+            return "Review submitted";
+        }).orElse("Book not found");
+    }
 }

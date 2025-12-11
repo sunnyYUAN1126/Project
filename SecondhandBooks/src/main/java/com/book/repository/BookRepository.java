@@ -18,6 +18,9 @@ public interface BookRepository extends ListCrudRepository<Book, Long> {
     // Find by ISBN or Name
     List<Book> findByIsbnOrName(String isbn, String name);
 
+    // Match DB Enum: '待審核'
+    List<Book> findByAdminReview(String adminReview);
+
     @Query("""
                 SELECT
                     b.book_ISBN as isbn,
@@ -30,7 +33,7 @@ public interface BookRepository extends ListCrudRepository<Book, Long> {
                     (SELECT pi.image_url
                      FROM product_images pi
                      JOIN products p2 ON pi.product_id = p2.product_id
-                     WHERE p2.book_ISBN = b.book_ISBN
+                     WHERE p2.book_ISBN = b.book_ISBN AND p2.shelf_status = '上架'
                      LIMIT 1) as cover_image
                 FROM products b
                 WHERE b.shelf_status = '上架'
@@ -50,7 +53,7 @@ public interface BookRepository extends ListCrudRepository<Book, Long> {
                     (SELECT pi.image_url
                      FROM product_images pi
                      JOIN products p2 ON pi.product_id = p2.product_id
-                     WHERE p2.book_ISBN = b.book_ISBN
+                     WHERE p2.book_ISBN = b.book_ISBN AND p2.shelf_status = '上架'
                      LIMIT 1) as cover_image
                 FROM products b
                 WHERE b.shelf_status = '上架' AND b.category = :category
