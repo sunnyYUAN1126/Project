@@ -1,6 +1,5 @@
 package com.book.model;
 
-import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -10,7 +9,6 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 
-@Data
 @Table("products")
 public class Book {
 
@@ -76,4 +74,171 @@ public class Book {
     // and storing explicit values in 'sort_order' column.
     @MappedCollection(idColumn = "product_id")
     private java.util.SortedSet<ProductImage> images;
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public Long getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(Long sellerId) {
+        this.sellerId = sellerId;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public String getProductNew() {
+        return productNew;
+    }
+
+    public void setProductNew(String productNew) {
+        this.productNew = productNew;
+    }
+
+    public String getProductClassNote() {
+        return productClassNote;
+    }
+
+    public void setProductClassNote(String productClassNote) {
+        this.productClassNote = productClassNote;
+    }
+
+    public String getProductNote() {
+        return productNote;
+    }
+
+    public void setProductNote(String productNote) {
+        this.productNote = productNote;
+    }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
+    public String getShelfStatus() {
+        return shelfStatus;
+    }
+
+    public void setShelfStatus(String shelfStatus) {
+        this.shelfStatus = shelfStatus;
+    }
+
+    public String getAdminReview() {
+        return adminReview;
+    }
+
+    public void setAdminReview(String adminReview) {
+        this.adminReview = adminReview;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public java.util.SortedSet<ProductImage> getImages() {
+        return images;
+    }
+
+    public void setImages(java.util.SortedSet<ProductImage> images) {
+        this.images = images;
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "productId=" + productId +
+                ", sellerId=" + sellerId +
+                ", isbn='" + isbn + '\'' +
+                ", name='" + name + '\'' +
+                ", category='" + category + '\'' +
+                ", author='" + author + '\'' +
+                ", publisher='" + publisher + '\'' +
+                ", productNew='" + productNew + '\'' +
+                ", productClassNote='" + productClassNote + '\'' +
+                ", productNote='" + productNote + '\'' +
+                ", price=" + price +
+                ", stock=" + stock +
+                ", shelfStatus='" + shelfStatus + '\'' +
+                ", adminReview='" + adminReview + '\'' +
+                ", adminNote='" + adminNote + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
 }
