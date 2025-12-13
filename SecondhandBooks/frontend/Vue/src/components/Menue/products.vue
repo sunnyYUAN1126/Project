@@ -157,10 +157,33 @@ const processImageUrl = (url) => {
   return `http://localhost:8080/images/${newUrl}`;
 };
 
+// 關鍵字搜尋書籍
+const searchBooks = async (query) => {
+  if (!query || query.trim() === '') {
+    // 如果搜尋字串為空，重置回全部
+    fetchBooks('ALL');
+    return;
+  }
+  
+  try {
+    const url = `${API_BASE_URL}/search?query=${encodeURIComponent(query)}`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Network response was not ok');
+    uniqueBookList.value = await response.json();
+    
+    // 搜尋時關閉詳細頁
+    goBack();
+  } catch (error) {
+    console.error('Error searching books:', error);
+    uniqueBookList.value = [];
+  }
+};
+
 // 暴露方法給父組件
 defineExpose({
   goBack,
-  filterByCategory
+  filterByCategory,
+  searchBooks
 })
 </script>
 
@@ -317,13 +340,13 @@ defineExpose({
 }
 .content-wrapper {
   background-color: rgba(255, 255, 255, 0.5);
-  width: 85%;
+  width: 80%;
   margin: 0 auto;
   padding: 20px;
   min-height: 100vh;
   border-radius: 10px;
 }
 .row{
-  padding: 20px;
+  padding: 30px;
 }
 </style>

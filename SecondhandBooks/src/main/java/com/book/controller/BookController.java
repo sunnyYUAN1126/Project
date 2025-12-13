@@ -33,6 +33,12 @@ public class BookController {
         return ResponseEntity.ok(books);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<com.book.dto.BookSummaryDTO>> searchBooks(@RequestParam("query") String query) {
+        List<com.book.dto.BookSummaryDTO> books = bookService.searchBooks(query);
+        return ResponseEntity.ok(books);
+    }
+
     @GetMapping("/listings/{isbn}")
     public ResponseEntity<List<com.book.dto.BookListingDTO>> getBookListings(@PathVariable("isbn") String isbn) {
         List<com.book.dto.BookListingDTO> listings = bookService.getBookListings(isbn);

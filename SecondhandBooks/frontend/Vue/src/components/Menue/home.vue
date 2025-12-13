@@ -8,8 +8,11 @@ const productRef = ref(null);
 // 不需要 defineExpose productRef，因為通常是父組件要用子組件方法
 // 如果這是 App.vue 的子組件，則不需要 expose 給誰看，自己用就好
 
+const currentlySelectedCategory = ref('ALL');
+
 // 定義切換分類的函式
 const selectCategory = (category) => {
+  currentlySelectedCategory.value = category;
   if (productRef.value) {
     productRef.value.filterByCategory(category);
   }
@@ -18,34 +21,36 @@ const selectCategory = (category) => {
 // 搜尋功能 (模擬)
 const searchQuery = ref('');
 const handleSearch = () => {
-    console.log("搜尋:", searchQuery.value);
-    // 未來可以在這裡呼叫 productRef.value.filterBySearch(...)
+    // console.log("搜尋:", searchQuery.value);
+    if (productRef.value) {
+      productRef.value.searchBooks(searchQuery.value);
+    }
 }
 </script>
 
 <template>
-  <nav class="navbar bg-body-tertiary navbar-expand-lg bg-body-tertiary fixed-top second-nav">
+  <nav class="navbar bg-body-tertiary navbar-expand-lg  fixed-top second-nav">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#" @click.prevent="selectCategory('ALL')">二手書城</a>
+      <a class="navbar-brand" href="#" ></a>
 
       <ul class="nav nav-pills">
         <li class="nav-item">
-          <a class="nav-link" href="#" @click.prevent="selectCategory('ALL')">ALL</a>
+          <a class="nav-link" :class="{ active: currentlySelectedCategory === 'ALL' }" href="#" @click.prevent="selectCategory('ALL')">ALL</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" @click.prevent="selectCategory('文學類')">文學類</a>
+          <a class="nav-link" :class="{ active: currentlySelectedCategory === '文學類' }" href="#" @click.prevent="selectCategory('文學類')">文學類</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" @click.prevent="selectCategory('社會科學類')">社會科學類</a>
+          <a class="nav-link" :class="{ active: currentlySelectedCategory === '社會科學類' }" href="#" @click.prevent="selectCategory('社會科學類')">社會科學類</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" @click.prevent="selectCategory('商業管理類')">商業管理類</a>
+          <a class="nav-link" :class="{ active: currentlySelectedCategory === '商業管理類' }" href="#" @click.prevent="selectCategory('商業管理類')">商業管理類</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" @click.prevent="selectCategory('理工資訊類')">理工資訊類</a>
+          <a class="nav-link" :class="{ active: currentlySelectedCategory === '理工資訊類' }" href="#" @click.prevent="selectCategory('理工資訊類')">理工資訊類</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#" @click.prevent="selectCategory('醫學健康類')">醫學健康類</a>
+          <a class="nav-link" :class="{ active: currentlySelectedCategory === '醫學健康類' }" href="#" @click.prevent="selectCategory('醫學健康類')">醫學健康類</a>
         </li>
       </ul>          
     
@@ -78,5 +83,6 @@ const handleSearch = () => {
 }
 .second-nav {
   top: 80px;  
+  background-color: #eeeeee !important;
 }
 </style>

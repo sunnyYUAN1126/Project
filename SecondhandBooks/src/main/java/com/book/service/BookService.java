@@ -61,6 +61,24 @@ public class BookService {
             stocks = bookRepository.findStocksByCategory(category);
         }
 
+        return mergeStockIntoDetails(details, stocks);
+    }
+
+    public List<com.book.dto.BookSummaryDTO> searchBooks(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        String likeQuery = "%" + query.trim() + "%";
+        List<com.book.dto.BookSummaryDTO> details = bookRepository.findBookDetailsByNameContaining(likeQuery);
+        List<com.book.dto.BookStockDTO> stocks = bookRepository.findStocksByNameContaining(likeQuery);
+
+        return mergeStockIntoDetails(details, stocks);
+    }
+
+    private List<com.book.dto.BookSummaryDTO> mergeStockIntoDetails(
+            List<com.book.dto.BookSummaryDTO> details,
+            List<com.book.dto.BookStockDTO> stocks) {
+
         // Create a map for quick stock lookup by ISBN
         java.util.Map<String, Integer> stockMap = stocks.stream()
                 .collect(Collectors.toMap(
@@ -79,7 +97,6 @@ public class BookService {
                 detail.setTotalStock(0);
             }
         }
-
         return details;
     }
 
@@ -214,11 +231,13 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    // 轉換 Helper 方法
     private com.book.dto.BookReviewDTO convertToBookReviewDTO(Book book) {
         com.book.dto.BookReviewDTO dto = new com.book.dto.BookReviewDTO();
         dto.setProductId(book.getProductId());
         dto.setSellerId(book.getSellerId());
 
+        // 關鍵邏輯：透過 SellerId 去 User 表查詢 "賣家帳號" (sellerAccount)
         if (book.getSellerId() != null) {
             String sellerAccount = userRepository.findById(book.getSellerId())
                     .map(com.book.model.User::getAccount)

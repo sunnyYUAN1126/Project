@@ -1,24 +1,20 @@
 <template>
   <div class="container mt-4">
     <h2 class="mb-4 fw-bold">賣家上架的二手書審核</h2>
-    <div class="table-responsive">
+    <div class="table-responsive" style="min-width: 1500px;">
       <table class="table table-hover table-bordered table-striped text-center align-middle">
       <thead class="table-dark">
         <tr>
-          <th>會員帳號</th>
+          <th style="min-width: 100px;">會員帳號</th>
           <th>ISBN</th>
-          <th>書名</th>
-          <th>書籍作者</th>
-          <th>書籍出版社</th>
-          <th>分類</th>
-          <th>幾成新</th>
-          <th>有無筆記</th>
-          <th>書況描述</th>
+          <th style="min-width: 200px;">書籍資訊</th>
+          <th style="min-width: 100px;">分類</th>
+          <th style="min-width: 200px;">二手書狀況</th>
           <th>上架日期</th>
-          <th>二手價</th>
-          <th>圖片</th>
-          <th>審核</th>
-          <th>管理員備註</th>
+          <th style="min-width: 100px;">二手價</th>
+          <th style="min-width: 100px;">圖片</th>
+          <th style="min-width: 150px;">審核</th>
+          <th style="min-width: 150px;">管理員備註</th>
         </tr>
       </thead>
 
@@ -26,25 +22,31 @@
         <tr v-for="(book, index) in books" :key="index">
           <td>{{ book.user }}</td>
           <td>{{ book.isbn }}</td>
-          <td>{{ book.title }}</td>
-          <td>{{ book.author }}</td>
-          <td>{{ book.publisher }}</td>
+          <td class="text-start ps-3">
+            <div class="fw-bold mb-1">{{ book.title }}</div>
+            <div class="small text-muted">作者：{{ book.author }}</div>
+            <div class="small text-muted">出版社：{{ book.publisher }}</div>
+          </td>
           <td>{{ book.category }}</td>
-          <td>{{ book.condition }}</td>
-          <td>{{ book.notes }}</td>
-          <td>{{ book.status }}</td>
+          <td class="text-start ps-3">
+             <div >幾成新：{{ book.condition }}</div>
+             <div >筆記：{{ book.notes }}</div>
+             <div >描述：{{ book.status }}</div>
+          </td>
           <td>{{ book.date }}</td>
           <td>{{ book.price }}</td>
-          <td class="d-flex justify-content-center gap-2">
-            <img
-              v-for="(img, i) in book.images"
-              :key="i"
-              :src="img"
-              alt="book image"
-              class="img-thumbnail object-fit-cover"
-              style="width: 60px; height: 60px; cursor: pointer;"
-              @click="openModal(img)"
-            />
+          <td>
+            <div class="d-flex flex-column align-items-center gap-2">
+              <img
+                v-for="(img, i) in book.images"
+                :key="i"
+                :src="img"
+                alt="book image"
+                class="img-thumbnail object-fit-cover"
+                style="width: 60px; height: 60px; cursor: pointer;"
+                @click="openModal(img)"
+              />
+            </div>
           </td>
           <td>
             <button class="btn btn-success btn-sm me-2" @click="approve(book)">同意</button>
