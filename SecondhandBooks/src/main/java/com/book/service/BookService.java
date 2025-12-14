@@ -142,7 +142,7 @@ public class BookService {
 
         if (book.getImages() != null) {
             dto.setImages(book.getImages().stream()
-                    .map(com.book.model.ProductImage::getImageUrl)
+                    .map(img -> sanitizeImageUrl(img.getImageUrl()))
                     .collect(Collectors.toList()));
         } else {
             dto.setImages(java.util.Collections.emptyList());
@@ -259,13 +259,52 @@ public class BookService {
 
         if (book.getImages() != null) {
             dto.setImages(book.getImages().stream()
-                    .map(com.book.model.ProductImage::getImageUrl)
+                    .map(img -> sanitizeImageUrl(img.getImageUrl()))
                     .collect(Collectors.toList()));
         } else {
             dto.setImages(java.util.Collections.emptyList());
         }
 
         return dto;
+    }
+
+    private String sanitizeImageUrl(String url) {
+        if (url == null)
+            return null;
+
+        // Handle file encoded paths or raw paths
+        String cleanUrl = url.trim();
+
+        // If it's already a correct HTTP URL, return it
+        if (cleanUrl.startsWith("http://localhost:8080/images/")) {
+            return cleanUrl;
+        }
+
+        // Check for local file path patterns (both forward and backward slashes)
+        // Adjust regex or logic based on what's actually in DB.
+        // Assuming common "D:/Project/picture/" or "file:///D:/Project/picture/"
+
+        String filename = null;
+
+        if (cleanUrl.contains("D:/Project/picture/") || cleanUrl.contains("D:\\Project\\picture\\")) {
+            // Extract filename
+            java.io.File f = new java.io.File(cleanUrl.replace("file:///", ""));
+            filename = f.getName();
+        } else if (cleanUrl.startsWith("file:/")) {
+            // Try to just take the last part
+            int lastSlash = cleanUrl.lastIndexOf('/');
+            if (lastSlash != -1) {
+                filename = cleanUrl.substring(lastSlash + 1);
+            }
+        }
+
+        if (filename != null && !filename.isEmpty()) {
+            return "http://localhost:8080/images/" + filename;
+        }
+
+        // Fallback: return original if we can't parse it, or maybe it's a relative
+        // path?
+        return cleanUrl;
     }
 
     public String reviewBook(Long bookId, boolean isApproved, String note) {
