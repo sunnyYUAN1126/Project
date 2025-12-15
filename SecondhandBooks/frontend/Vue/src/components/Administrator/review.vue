@@ -1,7 +1,7 @@
 <template>
   <div class="container mt-4">
     <h2 class="mb-4 fw-bold">賣家上架的二手書審核</h2>
-    <div class="table-responsive" style="min-width: 1500px;">
+    <div class="table-responsive">
       <table class="table table-hover table-bordered table-striped text-center align-middle">
       <thead class="table-dark">
         <tr>
@@ -10,8 +10,8 @@
           <th style="min-width: 200px;">書籍資訊</th>
           <th style="min-width: 100px;">分類</th>
           <th style="min-width: 200px;">二手書狀況</th>
-          <th>上架日期</th>
-          <th style="min-width: 100px;">二手價</th>
+          <th>新增日期</th>
+          <th style="min-width: 70px;">二手價</th>
           <th style="min-width: 100px;">圖片</th>
           <th style="min-width: 150px;">審核</th>
           <th style="min-width: 150px;">管理員備註</th>
@@ -29,9 +29,9 @@
           </td>
           <td>{{ book.category }}</td>
           <td class="text-start ps-3">
-             <div >幾成新：{{ book.condition }}</div>
-             <div >筆記：{{ book.notes }}</div>
-             <div >描述：{{ book.status }}</div>
+             <div ><strong>幾成新：</strong>{{ book.condition }}</div>
+             <div ><strong>筆記：</strong>{{ book.notes }}</div>
+             <div ><strong>描述：</strong>{{ book.status }}</div>
           </td>
           <td>{{ book.date }}</td>
           <td>{{ book.price }}</td>

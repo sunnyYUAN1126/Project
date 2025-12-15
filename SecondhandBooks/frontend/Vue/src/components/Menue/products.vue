@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted, computed, inject } from 'vue'
-import { CartApi } from '../../api/cart.js';
 
 // ==========================================
 // 狀態變數
@@ -190,7 +189,17 @@ async function addToCart(product) {
   
   try {
     // product.productId is the specific item ID
-    await CartApi.addToCart(injectedUserId.value, product.productId);
+    const response = await fetch('http://localhost:8080/api/cart/add', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ buyerId: injectedUserId.value, productId: product.productId }),
+        credentials: 'include'
+    });
+    if (!response.ok) {
+        throw new Error("Failed to add to cart");
+    }
     alert("加入購物車成功！");
   } catch (error) {
     console.error("Add to cart error:", error);

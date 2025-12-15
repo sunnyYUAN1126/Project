@@ -79,7 +79,7 @@
           <input class="form-control" type="number" v-model="form.price" min="0" />
         </div>
 
-        <!-- 上架日期 & 數量 -->
+        <!-- 新增日期 & 數量 -->
         <div class="row mb-3">
           <div class="col">
             <label class="form-label">上架日期：</label>

@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { CartApi } from '../../api/cart.js'; // Adjust path if needed
 
 const props = defineProps({
   userId: {
@@ -19,7 +18,14 @@ async function fetchCart() {
     return;
   }
   try {
-    const data = await CartApi.getCart(props.userId);
+    const response = await fetch(`http://localhost:8080/api/cart/${props.userId}`, {
+        credentials: 'include'
+    });
+    if (!response.ok) {
+        throw new Error("Failed to fetch cart");
+    }
+    const data = await response.json();
+    
     // 轉換成前端需要的格式 (API return CartItemDTO)
     // DTO fields: cartId, productId, productName, productPrice, sellerName, coverImage
     cart.value = data.map(item => ({
@@ -94,13 +100,15 @@ async function removeItem(index, cartId) {
   if (!confirm("確定要刪除嗎？")) return;
   
   try {
-    await CartApi.removeFromCart(cartId);
+    const response = await fetch(`http://localhost:8080/api/cart/${cartId}`, {
+        method: "DELETE",
+        credentials: 'include'
+    });
+    if (!response.ok) {
+        throw new Error("Failed to remove item");
+    }
+    
     // 成功後從本地陣列移除
-    // Note: index passed from v-for might be index in current view/group, not global cart array if using grouped
-    // But in main view (v-if="!showCheckoutConfirm"), we iterate `cart`.
-    // Wait, let's make sure we find the item index correctly or just refetch.
-    // Refetch is safer but slower. Splice using index from `cart` loop is fine.
-    // Let's rely on finding by cartId to be safe.
     const cartIndex = cart.value.findIndex(c => c.cartId === cartId);
     if (cartIndex !== -1) {
       cart.value.splice(cartIndex, 1);

@@ -19,6 +19,71 @@ public class BookListingDTO {
     private List<String> images;
     private Long sellerId;
 
+    // New fields for management view
+    private String isbn;
+    private String name;
+    private String category;
+    private String adminReview;
+    private String adminNote;
+    private String author;
+    private String publisher;
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setAdminReview(String adminReview) {
+        this.adminReview = adminReview;
+    }
+
+    public String getAdminReview() {
+        return adminReview;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
     public Long getSellerId() {
         return sellerId;
     }

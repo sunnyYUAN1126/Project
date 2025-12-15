@@ -7,21 +7,17 @@
         <thead class="table-dark">
           <tr>
             <th>ISBN</th>
-            <th>書名</th>
+            <th style="width: 200px;">書籍資訊</th>
             <th>分類</th>
-            <th @click="setSort('condition')" style="cursor: pointer;">
-              幾成新 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'condition', 'text-secondary': currentSortField !== 'condition'}"></i>
-            </th>
-            <th>有無筆記</th>
-            <th>書況描述</th>
+            <th style="width: 150px;">二手書狀況</th>
             <th @click="setSort('uploadTime')" style="cursor: pointer;">
-              上架日期 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'uploadTime', 'text-secondary': currentSortField !== 'uploadTime'}"></i>
+              新增日期 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'uploadTime', 'text-secondary': currentSortField !== 'uploadTime'}"></i>
             </th>
             <th @click="setSort('price')" style="cursor: pointer;">
               二手價 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'price', 'text-secondary': currentSortField !== 'price'}"></i>
             </th>
             <th>圖片</th>
-            <th>管理員審核</th>
+            <th style="width: 100px;">管理員審核</th>
             <th>管理員備註</th>
             <th>上架狀態</th>
             <th>操作</th>
@@ -31,15 +27,21 @@
         <tbody>
           <tr v-for="(item, index) in sortedBooks" :key="index">
             <td>{{ item.isbn }}</td>
-            <td>{{ item.title }}</td>
+            <td class="text-start">
+              <div class="fw-bold">{{ item.title }}</div>
+              <div class="text-muted small">作者：{{ item.author }}</div>
+              <div class="text-muted small">出版社：{{ item.publisher }}</div>
+            </td>
             <td>{{ item.category }}</td>
-            <td>{{ item.condition }} 成新</td>
-            <td>{{ item.notes }}</td>
-            <td>{{ item.description }}</td>
+            <td class="text-start">
+              <div><strong>幾成新：</strong>{{ item.condition }}</div>
+              <div><strong>筆記：</strong>{{ item.notes }}</div>
+              <div><strong>描述：</strong>{{ item.description }}</div>
+            </td>
             <td>{{ item.uploadTime }}</td>
             <td>{{ item.price }}</td>
             <td>
-              <div class="d-flex gap-2 justify-content-center">
+              <div class="d-flex flex-column gap-2 align-items-center">
                 <img
                   v-for="(img, i) in item.images || []"
                   :key="i"
@@ -69,7 +71,7 @@
               {{ item.adminStatus === "審核通過" ? "上架" : "下架" }}
             </td>
             <td>
-              <button class="btn btn-danger btn-sm" @click="deleteBook(index)">刪除</button>
+              <button class="btn btn-danger btn-sm" @click="deleteBook(index, item.id)">刪除</button>
             </td>
           </tr>
         </tbody>
@@ -84,18 +86,43 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue"
+import { ref, computed, onMounted } from "vue"
 
-const books = ref([
-  { isbn: "9789865021234", title: "資料庫系統概論", category: "商業與管理類", condition: 9, notes: "無筆記", description: "近全新，無破損", uploadTime: "2025-01-01", price: 250, images: [], adminStatus: "待審核", adminNote: "無" },
-  { isbn: "9789574425678", title: "Java 程式設計", category: "社會科學類", condition: 8, notes: "少量筆記", description: "封面微折", uploadTime: "2025-01-15", price: 150, images: [], adminStatus: "審核通過", adminNote: "檢查過封面" },
-  { isbn: "9789861234561", title: "Python 程式設計", category: "理工與資訊類", condition: 7, notes: "無筆記", description: "良好", uploadTime: "2025-02-01", price: 200, images: [], adminStatus: "審核不通過", adminNote: "頁面缺頁" },
-  { isbn: "9789861234562", title: "微積分", category: "理學類", condition: 9, notes: "少量筆記", description: "近全新", uploadTime: "2025-03-05", price: 300, images: [], adminStatus: "審核通過", adminNote: "封面良好" },
-  { isbn: "9789861234563", title: "經濟學原理", category: "商業與管理類", condition: 8, notes: "大量筆記", description: "使用痕跡明顯", uploadTime: "2025-04-10", price: 180, images: [], adminStatus: "待審核", adminNote: "需確認筆記量" },
-  { isbn: "9789861234564", title: "英語文法", category: "文學與人文類", condition: 7, notes: "無筆記", description: "封面良好", uploadTime: "2025-05-12", price: 120, images: [], adminStatus: "審核通過", adminNote: "符合上架規範" },
-  { isbn: "9789861234565", title: "行為心理學", category: "社會科學類", condition: 6, notes: "少量筆記", description: "一般", uploadTime: "2025-06-01", price: 150, images: [], adminStatus: "審核不通過", adminNote: "缺頁" },
-  { isbn: "9789861234566", title: "生物學概論", category: "醫學與健康類", condition: 9, notes: "無筆記", description: "近全新", uploadTime: "2025-07-15", price: 280, images: [], adminStatus: "審核通過", adminNote: "檢查封面及內頁" }
-])
+const books = ref([])
+
+// Load books on mount
+onMounted(async () => {
+  try {
+    const response = await fetch("http://localhost:8080/api/books/my-books", {
+        credentials: 'include'
+    });
+    if (!response.ok) {
+        throw new Error("Failed to fetch my books");
+    }
+    const data = await response.json();
+
+    books.value = data.map(item => ({
+       id: item.productId,
+       isbn: item.isbn,
+       title: item.name,
+       author: item.author,
+       publisher: item.publisher,
+       category: item.category,
+       condition: item.condition,
+       notes: item.status, 
+       description: item.note,
+       uploadTime: item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A',
+       price: item.price,
+       images: item.images,
+       adminStatus: item.adminReview || "待審核",
+       adminNote: item.adminNote || "無",
+       shelfStatus: item.shelfStatus
+    }));
+
+  } catch (err) {
+    console.error("Error loading books:", err);
+  }
+})
 
 const currentSortField = ref(null)
 
@@ -117,7 +144,7 @@ const sortedBooks = computed(() => {
     // 預設排序：管理員狀態
     list.sort((a, b) => {
       const order = { "審核通過": 0, "待審核": 1, "審核不通過": 2 }
-      return order[a.adminStatus] - order[b.adminStatus]
+      return (order[a.adminStatus] || 99) - (order[b.adminStatus] || 99)
     })
   }
   return list
@@ -125,9 +152,25 @@ const sortedBooks = computed(() => {
 
 const previewImage = ref(null)
 
-function deleteBook(index) {
+async function deleteBook(index, bookId) {
   if (confirm("確定要刪除這本書嗎？")) {
-    books.value.splice(index, 1)
+    try {
+        const response = await fetch(`http://localhost:8080/api/books/${bookId}`, {
+            method: "DELETE",
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || "Failed to delete book");
+        }
+
+        books.value.splice(index, 1);
+        alert("刪除成功");
+    } catch (err) {
+        console.error("Delete error:", err);
+        alert("刪除失敗: " + err.message);
+    }
   }
 }
 

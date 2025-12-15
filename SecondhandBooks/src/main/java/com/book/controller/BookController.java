@@ -100,4 +100,30 @@ public class BookController {
         String result = bookService.reviewBook(id, approved, note);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/my-books")
+    public ResponseEntity<List<com.book.dto.BookListingDTO>> getMyBooks(HttpSession session) {
+        Long userId = (Long) session.getAttribute("user_id");
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(bookService.getMyBooks(userId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteBook(@PathVariable Long id, HttpSession session) {
+        Long userId = (Long) session.getAttribute("user_id");
+        if (userId == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "請先登入"));
+        }
+
+        String result = bookService.deleteBook(id, userId);
+        if ("Book deleted successfully".equals(result)) {
+            return ResponseEntity.ok(Map.of("message", result));
+        } else if (result.startsWith("Unauthorized")) {
+            return ResponseEntity.status(403).body(Map.of("message", result));
+        } else {
+            return ResponseEntity.status(404).body(Map.of("message", result));
+        }
+    }
 }

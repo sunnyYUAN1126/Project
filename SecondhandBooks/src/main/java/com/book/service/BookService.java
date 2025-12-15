@@ -141,6 +141,15 @@ public class BookService {
         dto.setCreatedAt(book.getCreatedAt());
         dto.setShelfStatus(book.getShelfStatus());
 
+        // Populate new fields
+        dto.setIsbn(book.getIsbn());
+        dto.setName(book.getName());
+        dto.setCategory(book.getCategory());
+        dto.setAdminReview(book.getAdminReview());
+        dto.setAdminNote(book.getAdminNote());
+        dto.setAuthor(book.getAuthor());
+        dto.setPublisher(book.getPublisher());
+
         if (book.getImages() != null) {
             dto.setImages(book.getImages().stream()
                     .map(img -> sanitizeImageUrl(img.getImageUrl()))
@@ -327,6 +336,24 @@ public class BookService {
             // it.
             bookRepository.save(book);
             return "Review submitted";
+        }).orElse("Book not found");
+    }
+
+    public List<com.book.dto.BookListingDTO> getMyBooks(Long userId) {
+        List<Book> myBooks = bookRepository.findBySellerId(userId);
+        return myBooks.stream()
+                .sorted(Comparator.comparing(Book::getCreatedAt, Comparator.reverseOrder()))
+                .map(this::convertToBookListingDTO)
+                .collect(Collectors.toList());
+    }
+
+    public String deleteBook(Long bookId, Long userId) {
+        return bookRepository.findById(bookId).map(book -> {
+            if (!book.getSellerId().equals(userId)) {
+                return "Unauthorized: You do not own this book";
+            }
+            bookRepository.delete(book);
+            return "Book deleted successfully";
         }).orElse("Book not found");
     }
 }
