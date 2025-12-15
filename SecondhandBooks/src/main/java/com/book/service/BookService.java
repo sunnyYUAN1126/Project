@@ -130,6 +130,7 @@ public class BookService {
                     .orElse("Unknown");
             dto.setSellerName(sellerName);
         }
+        dto.setSellerId(book.getSellerId());
 
         dto.setCondition(book.getProductNew());
         dto.setNote(book.getProductNote());

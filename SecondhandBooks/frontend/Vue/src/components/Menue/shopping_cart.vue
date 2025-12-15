@@ -1,12 +1,49 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import { CartApi } from '../../api/cart.js'; // Adjust path if needed
 
-// 購物車資料，每個商品帶 seller 屬性
-var cart = ref([
-  { name: '貓咪去旅行', price: 300, seller: '貓賣家' },
-  { name: '123木頭人', price: 200, seller: '貓賣家' },
-  { name: '我們這一家', price: 250, seller: '狗賣家' }
-]);
+const props = defineProps({
+  userId: {
+    type: [Number, String],
+    default: null
+  }
+});
+
+// 購物車資料
+var cart = ref([]);
+
+// 抓取購物車資料
+async function fetchCart() {
+  if (!props.userId) {
+    cart.value = [];
+    return;
+  }
+  try {
+    const data = await CartApi.getCart(props.userId);
+    // 轉換成前端需要的格式 (API return CartItemDTO)
+    // DTO fields: cartId, productId, productName, productPrice, sellerName, coverImage
+    cart.value = data.map(item => ({
+      cartId: item.cartId,
+      productId: item.productId,
+      name: item.productName,
+      price: item.productPrice,
+      seller: item.sellerName || '未知賣家', 
+      coverImage: item.coverImage
+    }));
+  } catch (error) {
+    console.error("Fetch cart error:", error);
+    // alert("無法取得購物車資料");
+  }
+}
+
+// 監聽 userId 改變 (例如重新登入)
+watch(() => props.userId, (newVal) => {
+  if (newVal) {
+    fetchCart();
+  } else {
+    cart.value = [];
+  }
+}, { immediate: true });
 
 // 分組：依賣家分組
 var groupedCart = computed(() => {
@@ -53,12 +90,33 @@ const meetingTimes = [
 var showCheckoutConfirm = ref(false);
 
 // 刪除商品
-function removeItem(index) {
-  cart.value.splice(index, 1);
+async function removeItem(index, cartId) {
+  if (!confirm("確定要刪除嗎？")) return;
+  
+  try {
+    await CartApi.removeFromCart(cartId);
+    // 成功後從本地陣列移除
+    // Note: index passed from v-for might be index in current view/group, not global cart array if using grouped
+    // But in main view (v-if="!showCheckoutConfirm"), we iterate `cart`.
+    // Wait, let's make sure we find the item index correctly or just refetch.
+    // Refetch is safer but slower. Splice using index from `cart` loop is fine.
+    // Let's rely on finding by cartId to be safe.
+    const cartIndex = cart.value.findIndex(c => c.cartId === cartId);
+    if (cartIndex !== -1) {
+      cart.value.splice(cartIndex, 1);
+    }
+  } catch (error) {
+    console.error("Remove item error:", error);
+    alert("刪除失敗");
+  }
 }
 
 // 前往結帳
 function checkout() {
+  if (cart.value.length === 0) {
+    alert("購物車是空的！");
+    return;
+  }
   Object.keys(groupedCart.value).forEach(seller => {
     if (!checkoutInfo.value[seller]) {
       checkoutInfo.value[seller] = { location: '', date: '', time: '' };
@@ -68,7 +126,7 @@ function checkout() {
 }
 
 // 確認結帳
-function confirmCheckout() {
+async function confirmCheckout() {
   for (const seller of Object.keys(groupedCart.value)) {
     const info = checkoutInfo.value[seller];
     if (!info.location || !info.date || !info.time) {
@@ -77,7 +135,7 @@ function confirmCheckout() {
     }
   }
 
-  let message = `結帳成功！\n\n`;
+  let message = `結帳成功！（模擬）\n\n`;
   for (const seller of Object.keys(groupedCart.value)) {
     const info = checkoutInfo.value[seller];
     message += `${seller} 小計 $${sellerSubtotal(groupedCart.value[seller])}\n`;
@@ -85,7 +143,9 @@ function confirmCheckout() {
   }
   message += `總金額 $${total.value}`;
   alert(message);
-
+  
+  // 因為沒有真實結帳API，這裡只做前端清空，或者可以逐筆刪除
+  // 為求演示，這裡僅清空前端，真實情況應呼叫後端建立訂單並清空購物車
   cart.value = [];
   showCheckoutConfirm.value = false;
   checkoutInfo.value = {};
@@ -94,80 +154,90 @@ function confirmCheckout() {
 
 <template>
   <div class="cart-container">
-    <!-- 購物車清單 -->
-    <div v-if="!showCheckoutConfirm">
-      <h2>購物車內容</h2>
-
-      <div v-for="(item, i) in cart" :key="i" class="cart-item">
-        <div class="cart-name">{{ item.name }}（{{ item.seller }}）</div>
-        <div class="cart-price">二手價 ${{ item.price }}</div>
-        <button class="btn-delete" @click="removeItem(i)">刪除</button>
-      </div>
-
-      <div class="cart-summary">
-        總金額：${{ total }}
-      </div>
-
-      <button class="btn-checkout" @click="checkout">前往結帳</button>
+    <div v-if="!userId" class="text-center">
+      <p>請先登入以檢視購物車</p>
     </div>
 
-    <!-- 訂單確認 -->
-    <div v-else>
-      <h2>訂單確認</h2>
+    <template v-else>
+      <!-- 購物車清單 -->
+      <div v-if="!showCheckoutConfirm">
+        <h2>購物車內容</h2>
+        <div v-if="cart.length === 0" class="text-muted">目前的購物車是空的</div>
 
-      <div v-for="(items, seller) in groupedCart" :key="seller" class="seller-block">
-        <h3>{{ seller }}</h3>
-
-        <div v-for="(item, i) in items" :key="i" class="cart-item">
-          <div class="cart-name">{{ item.name }}</div>
-          <div class="cart-price">二手價 ${{ item.price }}</div>
+        <div v-for="(item, i) in cart" :key="item.cartId" class="cart-item d-flex justify-content-between align-items-center border-bottom py-2">
+          <div>
+            <div class="cart-name">{{ item.name }} <span class="text-muted" style="font-size: 0.9em;">({{ item.seller }})</span></div>
+            <div class="cart-price">二手價 ${{ item.price }}</div>
+          </div>
+          <button class="btn-delete" @click="removeItem(i, item.cartId)">刪除</button>
         </div>
 
-        <div class="cart-summary">
-          小計：${{ sellerSubtotal(items) }}
+        <div class="cart-summary" v-if="cart.length > 0">
+          總金額：${{ total }}
         </div>
 
-        <div class="location-input">
-          <label>面交地點：</label>
-          <select v-model="checkoutInfo[seller].location">
-            <option disabled value="">請選擇面交地點</option>
-            <option v-for="place in meetingPlaces" :key="place" :value="place">
-              {{ place }}
-            </option>
-          </select>
-        </div>
-
-        <div class="location-input">
-          <label>面交日期：</label>
-          <input type="date" v-model="checkoutInfo[seller].date" />
-        </div>
-
-        <div class="location-input">
-          <label>面交時間：</label>
-          <select v-model="checkoutInfo[seller].time">
-            <option disabled value="">請選擇面交時間</option>
-            <option v-for="time in meetingTimes" :key="time" :value="time">
-              {{ time }}
-            </option>
-          </select>
-        </div>
-
-        <hr />
+        <button class="btn-checkout" @click="checkout" v-if="cart.length > 0">前往結帳</button>
       </div>
 
-      <div class="cart-summary">
-        總金額：${{ total }}
-      </div>
+      <!-- 訂單確認 -->
+      <div v-else>
+        <h2>訂單確認</h2>
 
-      <button class="btn-checkout" @click="confirmCheckout">立即結帳</button>
-      <button class="btn-back" @click="showCheckoutConfirm = false">返回上一頁</button>
-    </div>
+        <div v-for="(items, seller) in groupedCart" :key="seller" class="seller-block mb-4 p-3 border rounded">
+          <h3 class="h5 mb-3 border-bottom pb-2">{{ seller }}</h3>
+
+          <div v-for="(item, i) in items" :key="item.cartId" class="cart-item mb-2">
+            <div class="d-flex justify-content-between">
+               <span>{{ item.name }}</span>
+               <span>${{ item.price }}</span>
+            </div>
+          </div>
+
+          <div class="cart-summary mt-2">
+            小計：${{ sellerSubtotal(items) }}
+          </div>
+
+          <div class="location-input mt-3">
+            <label>面交地點：</label>
+            <select v-model="checkoutInfo[seller].location">
+              <option disabled value="">請選擇面交地點</option>
+              <option v-for="place in meetingPlaces" :key="place" :value="place">
+                {{ place }}
+              </option>
+            </select>
+          </div>
+
+          <div class="location-input">
+            <label>面交日期：</label>
+            <input type="date" v-model="checkoutInfo[seller].date" />
+          </div>
+
+          <div class="location-input">
+            <label>面交時間：</label>
+            <select v-model="checkoutInfo[seller].time">
+              <option disabled value="">請選擇面交時間</option>
+              <option v-for="time in meetingTimes" :key="time" :value="time">
+                {{ time }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="cart-summary mb-3 p-2 bg-light rounded">
+          總金額：${{ total }}
+        </div>
+
+        <button class="btn-checkout mb-2" @click="confirmCheckout">立即結帳 (模擬)</button>
+        <button class="btn-back" @click="showCheckoutConfirm = false">返回上一頁</button>
+      </div>
+    </template>
   </div>
 </template>
 
 <style scoped>
 .cart-container {
-  width: 400px;
+  width: 100%;
+  max-width: 600px;
   margin: auto;
   padding: 20px;
   border: 1px solid #ccc;
@@ -177,7 +247,7 @@ function confirmCheckout() {
 }
 
 .cart-item {
-  padding: 5px 0;
+  /* padding: 5px 0; */
 }
 
 .cart-name {
@@ -192,55 +262,64 @@ function confirmCheckout() {
 
 .btn-delete {
   color: red;
-  margin-top: 5px;
   background: none;
-  border: none;
+  border: 1px solid red;
+  border-radius: 5px;
+  padding: 2px 8px;
   cursor: pointer;
+  font-size: 14px;
+}
+.btn-delete:hover {
+  background-color: #fff0f0;
 }
 
 .cart-summary {
   text-align: right;
   font-weight: bold;
   margin-top: 10px;
+  font-size: 1.1em;
 }
 
 .location-input {
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 .location-input label {
   display: block;
   font-size: 14px;
   margin-bottom: 3px;
+  font-weight: bold;
 }
 
 .location-input input,
 .location-input select {
   width: 100%;
-  padding: 5px;
+  padding: 8px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
 .btn-checkout {
   width: 100%;
-  margin-top: 10px;
-  padding: 8px;
-  background: #007bff;
+  margin-top: 15px;
+  padding: 10px;
+  background: #28a745;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
 }
 
 .btn-checkout:hover {
-  background: #0069d9;
+  background: #218838;
 }
 
 .btn-back {
   width: 100%;
   margin-top: 10px;
-  padding: 8px;
+  padding: 10px;
   background: #6c757d;
   color: white;
   border: none;
@@ -252,7 +331,8 @@ function confirmCheckout() {
   background: #5a6268;
 }
 
-hr {
-  margin: 10px 0;
+.text-muted {
+  color: #6c757d;
 }
 </style>
+

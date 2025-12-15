@@ -17,6 +17,15 @@ public class BookListingDTO {
     private LocalDateTime createdAt;
     private String shelfStatus;
     private List<String> images;
+    private Long sellerId;
+
+    public Long getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(Long sellerId) {
+        this.sellerId = sellerId;
+    }
 
     public Long getProductId() {
         return productId;

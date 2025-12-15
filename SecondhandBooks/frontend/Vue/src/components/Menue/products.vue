@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, inject } from 'vue'
+import { CartApi } from '../../api/cart.js';
 
 // ==========================================
 // 狀態變數
@@ -179,6 +180,24 @@ const searchBooks = async (query) => {
   }
 };
 
+const injectedUserId = inject('userId');
+
+async function addToCart(product) {
+  if (!injectedUserId || !injectedUserId.value) {
+    alert("請先登入才能加入購物車");
+    return;
+  }
+  
+  try {
+    // product.productId is the specific item ID
+    await CartApi.addToCart(injectedUserId.value, product.productId);
+    alert("加入購物車成功！");
+  } catch (error) {
+    console.error("Add to cart error:", error);
+    alert("加入購物車失敗");
+  }
+}
+
 // 暴露方法給父組件
 defineExpose({
   goBack,
@@ -276,8 +295,12 @@ defineExpose({
                 </td>
 
                 <td>
-                  <button class="btn btn-primary btn-sm">
-                    <i class="bi bi-cart4"></i> 加入購物車
+                  <button class="btn btn-primary btn-sm" 
+                          :disabled="injectedUserId && product.sellerId === injectedUserId"
+                          :class="{ 'btn-secondary': injectedUserId && product.sellerId === injectedUserId }"
+                          @click="addToCart(product)">
+                    <i class="bi bi-cart4"></i> 
+                    {{ injectedUserId && product.sellerId === injectedUserId ? '本人商品' : '加入購物車' }}
                   </button>
                 </td>
               </tr>
