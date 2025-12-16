@@ -7,15 +7,21 @@ public class OrderItemDTO {
     private String coverImage;
     private String isbn;
     private Integer price;
+    private String productNew;
+    private String productClassNote;
+    private String productNote;
 
     public OrderItemDTO(Long productId, String productName, String productAuthor, String coverImage, String isbn,
-            Integer price) {
+            Integer price, String productNew, String productClassNote, String productNote) {
         this.productId = productId;
         this.productName = productName;
         this.productAuthor = productAuthor;
         this.coverImage = coverImage;
         this.isbn = isbn;
         this.price = price;
+        this.productNew = productNew;
+        this.productClassNote = productClassNote;
+        this.productNote = productNote;
     }
 
     // Getters and Setters
@@ -65,5 +71,29 @@ public class OrderItemDTO {
 
     public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public String getProductNew() {
+        return productNew;
+    }
+
+    public void setProductNew(String productNew) {
+        this.productNew = productNew;
+    }
+
+    public String getProductClassNote() {
+        return productClassNote;
+    }
+
+    public void setProductClassNote(String productClassNote) {
+        this.productClassNote = productClassNote;
+    }
+
+    public String getProductNote() {
+        return productNote;
+    }
+
+    public void setProductNote(String productNote) {
+        this.productNote = productNote;
     }
 }

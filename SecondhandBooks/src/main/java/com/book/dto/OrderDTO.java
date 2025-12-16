@@ -9,6 +9,7 @@ public class OrderDTO {
     private Long buyerId;
     private Long sellerId;
     private String sellerName;
+    private String buyerName;
     private String meetupLocation;
     private LocalDate meetupDate;
     private String meetupTime;
@@ -48,6 +49,14 @@ public class OrderDTO {
 
     public void setSellerName(String sellerName) {
         this.sellerName = sellerName;
+    }
+
+    public String getBuyerName() {
+        return buyerName;
+    }
+
+    public void setBuyerName(String buyerName) {
+        this.buyerName = buyerName;
     }
 
     public String getMeetupLocation() {

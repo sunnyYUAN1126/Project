@@ -1,7 +1,6 @@
 <template>
   <div class="container mt-4" >
     <!-- 切換按鈕 -->
-    <!-- 切換按鈕 -->
     <div class="mb-4 d-flex gap-2 my-5">
       <button
         @click="currentTab = 'current'"
@@ -17,118 +16,109 @@
       </button>
     </div>
 
-    <!-- 目前訂單 -->
-    <div v-show="currentTab === 'current'" class="table-responsive mb-4">
-      <h3 class="fw-bold mb-4">目前訂單</h3>
-      <table class="table table-striped table-hover table-bordered text-center align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>訂單編號</th>
-            <th>訂單用戶</th>
-            <th>isbn</th>
-            <th>書籍名稱</th>
-            <th>金額細項</th>
-            <th>訂單金額</th>
-            <th>面交地點</th>
-            <th>面交日期</th>
-            <th>面交時間</th>
-            <th>訂單狀態</th>
-            <th>下單日期</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="order in currentOrders" :key="order.id">
-            <td>{{ order.orderNo }}</td>
-            <td>{{ order.user }}</td>
-            <td class="p-0 align-middle">
-              <div v-for="(code, index) in order.isbns" :key="index" class="py-2" :class="{'border-bottom': index < order.isbns.length - 1}">{{ code }}</div>
-            </td>
+    <!-- Container for List -->
+    <div>
+      <h3 class="fw-bold mb-4">{{ currentTab === 'current' ? '目前訂單' : '交易歷史' }}</h3>
+      
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div v-for="order in (currentTab === 'current' ? currentOrders : historyOrders)" :key="order.id" class="card mb-3 shadow-sm" style="border: 2px solid #ccc; border-radius: 20px; overflow: hidden;">
+              <!-- Card Header -->
+              <div class="card-header bg-white border-0 pt-2 px-3 d-flex justify-content-between align-items-center">
+                 <span class="fw-bold">訂單編號 {{ order.orderNo }}</span>
+                 
+                 <!-- Status Moved Here -->
+                 <div class="text-center">
+                      <div v-if="currentTab === 'current'">
+                          <select 
+                            v-model="order.status" 
+                            @change="handleStatusChange(order)" 
+                            :disabled="order.status !== '待面交'"
+                            class="form-select form-select-sm w-auto mx-auto"
+                            style="font-size: 20px; padding: 8px 18px;"
+                          >
+                            <option>待面交</option>
+                            <option>交易完成</option>
+                            <option>取消</option>
+                          </select>
+                      </div>
+                      <div v-else>
+                          <span class="fw-bold" style="font-size: 20px;"
+                            :class="{
+                              'text-warning': order.status === '待面交',
+                              'text-success': order.status === '交易完成',
+                              'text-danger': order.status === '取消'
+                            }"
+                          >
+                             {{ order.status }}
+                          </span>
+                      </div>
+                 </div>
 
-            <td class="p-0 text-start align-middle">
-              <div v-for="(name, index) in order.bookNames" :key="index" class="p-2" :class="{'border-bottom': index < order.bookNames.length - 1}">{{ name }}</div>
-            </td>
-            <td class="p-0 align-middle">
-              <div v-for="(price, index) in order.prices" :key="index" class="py-2" :class="{'border-bottom': index < order.prices.length - 1}">{{ price }}</div>
-            </td>
+                 <span class="text-muted small">下單日期 {{ order.orderDate }}</span>
+              </div>
+              
+              <!-- Buyer Info -->
+              <div class="px-3 py-1 border-bottom small">
+                <span class="fw-bold">訂單用戶：</span> {{ order.user }}
+              </div>
 
-            <td>{{ order.amount }}</td>
-            <td>{{ order.location }}</td>
-            <td>{{ order.date }}</td>
-            <td>{{ order.time }}</td>
-            <td>
-              <select 
-                v-model="order.status" 
-                @change="handleStatusChange(order)" 
-                :disabled="order.status !== '待面交'"
-                class="form-select form-select-sm"
-              >
-                <option>待面交</option>
-                <option>交易完成</option>
-                <option>取消</option>
-              </select>
+              <!-- Order Items -->
+              <div class="card-body px-3 py-1">
+                 <div v-for="(item, index) in order.items" :key="index">
+                    <div class="row py-2 align-items-center">
+                       
+                       <!-- Image -->
+                       <div class="col-md-2 col-2">
+                          <img :src="item.coverImage || 'https://via.placeholder.com/100x100?text=No+Image'" 
+                               class="img-fluid rounded" 
+                               style="width: 60px; height: 60px; object-fit: cover;" 
+                               alt="Book Cover">
+                       </div>
 
-            </td>
-            <td>{{ order.orderDate }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                       <!-- Details -->
+                       <div class="col-md-8 col-7">
+                          <div class="mb-0 small"><strong>ISBN：</strong> {{ item.isbn }}</div>
+                          <div class="mb-0 fw-bold">{{ item.productName }}</div>
+                          <div class="text-muted small" style="font-size: 0.85rem;">
+                             二手書資訊：
+                             <span v-if="item.productNew">{{ item.productNew }}</span>
+                             <span v-if="item.productClassNote">、{{ item.productClassNote }}</span>
+                             <span v-if="item.productNote">、{{ item.productNote }}</span>
+                          </div>
+                       </div>
 
-    <!-- 歷史訂單 -->
-    <div v-show="currentTab === 'history'" class="table-responsive">
-      <h3 class="fw-bold mb-4">交易歷史</h3>
-      <table class="table table-striped table-hover table-bordered text-center align-middle">
-        <thead class="table-light">
-          <tr>
-            <th>訂單編號</th>
-            <th>訂單用戶</th>
-            <th>isbn</th>
-            <th>書籍名稱</th>
-            <th>金額細項</th>
-            <th>訂單金額</th>
-            <th>面交地點</th>
-            <th>面交日期</th>
-            <th>面交時間</th>
-            <th>訂單狀態</th>
-            <th>下單日期</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="order in historyOrders" :key="order.id">
-            <td>{{ order.orderNo }}</td>
-            <td>{{ order.user }}</td>
-            <td class="p-0 align-middle">
-              <div v-for="(code, index) in order.isbns" :key="index" class="py-2" :class="{'border-bottom': index < order.isbns.length - 1}">{{ code }}</div>
-            </td>
+                       <!-- Unit Price -->
+                       <div class="col-md-2 col-3 text-end fw-bold">
+                          $ {{ item.price }}
+                       </div>
+                    </div>
+                    <!-- Item Divider (if not last) -->
+                    <hr v-if="index < order.items.length - 1" class="my-0 dashed-line">
+                 </div>
+              </div>
 
-            <td class="p-0 text-start align-middle">
-              <div v-for="(name, index) in order.bookNames" :key="index" class="p-2" :class="{'border-bottom': index < order.bookNames.length - 1}">{{ name }}</div>
-            </td>
-            <td class="p-0 align-middle">
-              <div v-for="(price, index) in order.prices" :key="index" class="py-2" :class="{'border-bottom': index < order.prices.length - 1}">{{ price }}</div>
-            </td>
+              <!-- Footer Info (Meetup, Status, Total) -->
+              <div class="card-footer bg-white border-top px-3 py-2">
+                <div class="row align-items-center">
+                   <!-- Meetup Info -->
+                   <div class="col-md-6 small">
+                      <div><strong>面交日期：</strong> {{ order.date }}</div>
+                      <div><strong>時間：</strong> {{ order.time }}</div>
+                      <div class="mb-0"><strong>面交地點：</strong> {{ order.location }}</div>
+                   </div>
 
-            <td>{{ order.amount }}</td>
-            <td>{{ order.location }}</td>
-            <td>{{ order.date }}</td>
-            <td>{{ order.time }}</td>
-            <td>
-              <span 
-                :class="{
-                  'text-warning': order.status === '待面交',
-
-                  'text-success': order.status === '交易完成',
-                  'text-danger': order.status === '取消'
-                }"
-                class="fw-bold"
-              >
-                {{ order.status }}
-              </span>
-            </td>
-            <td>{{ order.orderDate }}</td>
-          </tr>
-        </tbody>
-      </table>
+                   <!-- Total Price -->
+                   <div class="col-md-6 text-end">
+                      <span class="text-muted ms-2 small">訂單金額:</span>
+                      <span class="fs-5 fw-bold">$ {{ order.amount }}</span>
+                   </div>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+      
     </div>
   </div>
 </template>
@@ -158,10 +148,8 @@ async function fetchOrders() {
       const order = {
         id: o.orderId,
         orderNo: `No.${o.orderId}`,
-        user: `買家 ${o.buyerId}`, // Placeholder for buyer name
-        bookNames: o.items.map(i => i.productName),
-        isbns: o.items.map(i => i.isbn),
-        prices: o.items.map(i => i.price),
+        user: o.buyerName || `買家 ${o.buyerId}`, // Fallback if name is missing
+        items: o.items, // Keep full items list
         amount: o.totalPrice,
         location: o.meetupLocation,
         date: o.meetupDate,
@@ -184,20 +172,10 @@ async function fetchOrders() {
 
 async function handleStatusChange(order) {
   const newStatus = order.status;
-  // Note: order.status is already updated by v-model when this triggers if I don't prevent it.
-  // Actually, v-model updates it. So `order.status` is the NEW value.
-  // But I need to confirm first.
-  
-  // Wait, if I use v-model, the value changes before I can confirm.
-  // Better to use :value and @change with manual update or just confirm AFTER change (and revert if cancelled).
-  
-  // Revert logic is tricky without previous value.
-  // I'll assume the user selected a target status.
   
   if (newStatus === '交易完成' || newStatus === '取消') {
     const confirmed = confirm(`你確定要將訂單 ${order.orderNo} 設為「${newStatus}」嗎？`);
     if (!confirmed) {
-        // Revert to '待面交' (assuming it was capable of being changed from there)
        order.status = '待面交';
        return;
     }
@@ -240,4 +218,10 @@ onMounted(() => {
     fetchOrders();
 });
 </script>
+
+<style scoped>
+.dashed-line {
+    border-top: 1px dashed #ccc;
+}
+</style>
 

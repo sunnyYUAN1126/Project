@@ -110,7 +110,10 @@ public class OrderController {
         OrderDTO dto = new OrderDTO();
         dto.setOrderId(order.getOrderId());
         dto.setBuyerId(order.getBuyerId());
-        dto.setBuyerId(order.getBuyerId());
+
+        com.book.model.User buyer = userRepository.findById(order.getBuyerId()).orElse(null);
+        dto.setBuyerName(buyer != null ? buyer.getAccount() : "Unknown");
+
         dto.setSellerId(order.getSellerId());
 
         com.book.model.User seller = userRepository.findById(order.getSellerId()).orElse(null);
@@ -133,11 +136,20 @@ public class OrderController {
 
                 String coverImage = null;
                 if (book != null && book.getImages() != null && !book.getImages().isEmpty()) {
-                    coverImage = book.getImages().first().getImageUrl();
+                    String rawPath = book.getImages().first().getImageUrl();
+                    if (rawPath != null) {
+                        // Extract filename and prepend /images/
+                        // Assuming rawPath is like D:/Project/picture/filename.jpg
+                        String filename = new java.io.File(rawPath).getName();
+                        coverImage = "http://localhost:8080/images/" + filename;
+                    }
                 }
 
                 String isbn = (book != null) ? book.getIsbn() : "";
                 Integer price = (book != null) ? book.getPrice() : 0;
+                String productNew = (book != null) ? book.getProductNew() : "";
+                String productClassNote = (book != null) ? book.getProductClassNote() : "";
+                String productNote = (book != null) ? book.getProductNote() : "";
 
                 itemDTOs.add(new OrderItemDTO(
                         item.getProductId(),
@@ -145,7 +157,10 @@ public class OrderController {
                         author,
                         coverImage,
                         isbn,
-                        price));
+                        price,
+                        productNew,
+                        productClassNote,
+                        productNote));
 
                 total += price;
 

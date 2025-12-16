@@ -1,70 +1,94 @@
 <template>
   <div class="container mt-4">
     <h2 class="text-center fw-bold mb-4">我的訂單</h2>
-    <div class="table-responsive">
-      <table class="table table-bordered table-striped table-hover text-center align-middle">
-        <thead class="table-dark">
-          <tr>
-            <th>訂單編號</th>
-            <th>賣家用戶</th>
-            <th>ISBN</th>
-            <th>書籍名稱</th>
-            <th>金額細項</th>
-            <th>訂單合計</th>
-            <th>面交地點</th>
-            <th>面交日期</th>
-            <th>面交時間</th>
-            <th>訂單狀態</th>
-            <th>下單日期</th>
-            <th>取消訂單</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="order in orders" :key="order.id">
-            <td>{{ order.orderNo }}</td>
-            <td>{{ order.sellerName }}</td>
-            <td class="p-0 align-middle">
-              <div v-for="(code, index) in order.isbns" :key="index" class="py-2" :class="{'border-bottom': index < order.isbns.length - 1}">{{ code }}</div>
-            </td>
-            <td class="p-0 text-start align-middle">
-              <div v-for="(name, index) in order.bookNames" :key="index" class="p-2" :class="{'border-bottom': index < order.bookNames.length - 1}">{{ name }}</div>
-            </td>
-            <td class="p-0 align-middle">
-              <div v-for="(price, index) in order.prices" :key="index" class="py-2" :class="{'border-bottom': index < order.prices.length - 1}">{{ price }}</div>
-            </td>
-
-            <td>{{ order.amount }}</td>
-            <td>{{ order.location }}</td>
-            <td>{{ order.date }}</td>
-            <td>{{ order.time }}</td>
-            <td>
-              <span 
+    
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div v-for="order in orders" :key="order.id" class="card mb-3 shadow-sm" style="border: 2px solid #ccc; border-radius: 20px; overflow: hidden;">
+          <!-- Card Header -->
+          <div class="card-header bg-white border-0 pt-2 px-3 d-flex justify-content-between align-items-center">
+             <span class="fw-bold">訂單編號 {{ order.orderNo }}</span>
+             
+             <!-- Status Moved Here -->
+             <span class="fw-bold" style="font-size: 25px;"
                 :class="{
-                  'badge bg-warning text-dark': order.status === '待面交',
-
-                  'badge bg-success': order.status === '交易完成',
-                  'badge bg-danger': order.status === '取消'
+                  'text-warning': order.status === '待面交',
+                  'text-success': order.status === '交易完成',
+                  'text-danger': order.status === '取消'
                 }"
               >
-                {{ order.status }}
+                 {{ order.status }}
               </span>
-            </td>
-            <td>{{ order.orderDate }}</td>
-            <td>
-              <!-- 只有代面交才顯示 -->
-              <button 
-                v-if="order.status === '待面交'"   
 
-                @click="cancelOrder(order)" 
-                class="btn btn-outline-dark btn-sm"
-              >
-                取消訂單
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+             <span class="text-muted small">下單日期 {{ order.orderDate }}</span>
+          </div>
+          
+          <!-- Seller Info -->
+          <div class="px-3 py-1 border-bottom small">
+            <span class="fw-bold">賣家用戶：</span> {{ order.sellerName }}
+          </div>
+
+          <!-- Order Items -->
+          <div class="card-body px-3 py-1">
+             <div v-for="(item, index) in order.items" :key="index">
+                <div class="row py-2 align-items-center">
+                   
+                   <!-- Image -->
+                   <div class="col-md-2 col-2">
+                      <img :src="item.coverImage || 'https://via.placeholder.com/100x100?text=No+Image'" 
+                           class="img-fluid rounded" 
+                           style="width: 60px; height: 60px; object-fit: cover;" 
+                           alt="Book Cover">
+                   </div>
+
+                   <!-- Details -->
+                   <div class="col-md-8 col-7">
+                      <div class="mb-0 small"><strong>ISBN：</strong> {{ item.isbn }}</div>
+                      <div class="mb-0 fw-bold">{{ item.productName }}</div>
+                      <div class="text-muted small" style="font-size: 0.85rem;">
+                         二手書資訊：
+                         <span v-if="item.productNew">{{ item.productNew }}</span>
+                         <span v-if="item.productClassNote">、{{ item.productClassNote }}</span>
+                         <span v-if="item.productNote">、{{ item.productNote }}</span>
+                      </div>
+                   </div>
+
+                   <!-- Unit Price -->
+                   <div class="col-md-2 col-3 text-end fw-bold">
+                      $ {{ item.price }}
+                   </div>
+                </div>
+                <!-- Item Divider (if not last) -->
+                <hr v-if="index < order.items.length - 1" class="my-0 dashed-line">
+             </div>
+          </div>
+
+          <!-- Footer Info (Meetup, Status, Total) -->
+          <div class="card-footer bg-white border-top px-3 py-2">
+            <div class="row align-items-center">
+               <!-- Meetup Info -->
+               <div class="col-md-6 small">                  
+                  <div><strong>面交日期：</strong> {{ order.date }}</div>
+                  <div><strong>時間：</strong> {{ order.time }}</div>
+                  <div class="mb-0"><strong>面交地點：</strong> {{ order.location }}</div>
+               </div>
+
+               <!-- Total Price -->
+               <div class="col-md-6 text-end">
+                  <span class="text-muted ms-2 small">訂單金額</span>
+                  <span class="fs-5 fw-bold ms-1">$ {{ order.amount }}</span>
+               </div>
+            </div>
+
+            <div class="text-end mt-2">
+                <button v-if="order.status === '待面交'" @click="cancelOrder(order)" class="btn btn-outline-danger btn-sm" style="font-size: 20px; padding: 2px 8px;">取消訂單</button>
+            </div>
+          
+          </div>
+        </div>
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -81,15 +105,11 @@ async function fetchOrders() {
     if (!response.ok) throw new Error("Failed to fetch orders");
     const data = await response.json();
     
-    // Map backend DTO to frontend structure
-    // Backend DTO: orderId, buyerId, sellerId, meetupLocation, meetupDate, meetupTime, status, createdAt, items (List), totalPrice
     orders.value = data.buying.map(o => ({
       id: o.orderId,
       orderNo: `No.${o.orderId}`,
-      sellerName: o.sellerName, // Now using real seller account from DTO
-      bookNames: o.items.map(i => i.productName),
-      isbns: o.items.map(i => i.isbn),
-      prices: o.items.map(i => i.price),
+      sellerName: o.sellerName,
+      items: o.items, // Pass full items list with details
       amount: o.totalPrice,
       location: o.meetupLocation,
       date: o.meetupDate,
@@ -111,7 +131,6 @@ async function cancelOrder(order) {
       });
       if (!response.ok) throw new Error("Failed to cancel");
       
-      // Update local status
       order.status = '取消';
       alert("訂單已取消");
     } catch (err) {
@@ -125,4 +144,10 @@ onMounted(() => {
   fetchOrders();
 });
 </script>
+
+<style scoped>
+.dashed-line {
+    border-top: 1px dashed #ccc;
+}
+</style>
 
