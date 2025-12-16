@@ -11,6 +11,7 @@ import java.util.List;
 
 @Repository
 public interface CartRepository extends CrudRepository<Cart, Long> {
+    List<Cart> findByBuyerId(Long buyerId);
 
     @Query("""
             SELECT
@@ -19,7 +20,9 @@ public interface CartRepository extends CrudRepository<Cart, Long> {
                 p.book_name as product_name,
                 p.product_price as product_price,
                 u.account as seller_name,
+                u.user_id as seller_id,
                 (SELECT pi.image_url
+
                  FROM product_images pi
                  WHERE pi.product_id = p.product_id
                  LIMIT 1) as cover_image

@@ -7,9 +7,10 @@
           <tr>
             <th>訂單編號</th>
             <th>賣家用戶</th>
+            <th>ISBN</th>
             <th>書籍名稱</th>
-            <th>isbn</th>
-            <th>訂單金額</th>
+            <th>金額細項</th>
+            <th>訂單合計</th>
             <th>面交地點</th>
             <th>面交日期</th>
             <th>面交時間</th>
@@ -22,8 +23,16 @@
           <tr v-for="order in orders" :key="order.id">
             <td>{{ order.orderNo }}</td>
             <td>{{ order.sellerName }}</td>
-            <td>{{ order.bookName }}</td>
-            <td>{{ order.isbn }}</td>
+            <td class="p-0 align-middle">
+              <div v-for="(code, index) in order.isbns" :key="index" class="py-2" :class="{'border-bottom': index < order.isbns.length - 1}">{{ code }}</div>
+            </td>
+            <td class="p-0 text-start align-middle">
+              <div v-for="(name, index) in order.bookNames" :key="index" class="p-2" :class="{'border-bottom': index < order.bookNames.length - 1}">{{ name }}</div>
+            </td>
+            <td class="p-0 align-middle">
+              <div v-for="(price, index) in order.prices" :key="index" class="py-2" :class="{'border-bottom': index < order.prices.length - 1}">{{ price }}</div>
+            </td>
+
             <td>{{ order.amount }}</td>
             <td>{{ order.location }}</td>
             <td>{{ order.date }}</td>
@@ -31,7 +40,8 @@
             <td>
               <span 
                 :class="{
-                  'badge bg-warning text-dark': order.status === '代面交',
+                  'badge bg-warning text-dark': order.status === '待面交',
+
                   'badge bg-success': order.status === '交易完成',
                   'badge bg-danger': order.status === '取消'
                 }"
@@ -43,7 +53,8 @@
             <td>
               <!-- 只有代面交才顯示 -->
               <button 
-                v-if="order.status === '代面交'"   
+                v-if="order.status === '待面交'"   
+
                 @click="cancelOrder(order)" 
                 class="btn btn-outline-dark btn-sm"
               >
@@ -58,21 +69,60 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { ref, onMounted } from 'vue';
 
-const orders = reactive([
-  { id: 1, orderNo: 'No.1', sellerName: 'seam', bookName: '資料庫系統概論', isbn: '9789865023456', amount: 350, location: '台北車站', date: '2025/11/10', time: '上午10:00', status: '代面交', orderDate: '2025/10/25' },
-  { id: 2, orderNo: 'No.2', sellerName: 'luna', bookName: 'Java 程式設計', isbn: '9789864349281', amount: 420, location: '中山捷運站', date: '2025/11/12', time: '下午2:00', status: '代面交', orderDate: '2025/10/28' },
-  { id: 3, orderNo: 'No.3', sellerName: 'sunny', bookName: 'Python 入門指南', isbn: '9789863471120', amount: 280, location: '板橋車站', date: '2025/11/15', time: '下午4:00', status: '交易完成', orderDate: '2025/10/30' },
-]);
+const orders = ref([]);
 
-function cancelOrder(order) {
-  if (confirm(`確定要取消訂單 ${order.orderNo} 嗎？`)) {
-    order.status = '取消';
-    // 可在這裡呼叫 API 更新後端
-    // axios.post('/api/orders/cancel', { orderId: order.id })
-    //   .then(() => console.log('取消成功'))
-    //   .catch(err => console.error(err))
+async function fetchOrders() {
+  try {
+    const response = await fetch('http://localhost:8080/api/orders', {
+      credentials: 'include'
+    });
+    if (!response.ok) throw new Error("Failed to fetch orders");
+    const data = await response.json();
+    
+    // Map backend DTO to frontend structure
+    // Backend DTO: orderId, buyerId, sellerId, meetupLocation, meetupDate, meetupTime, status, createdAt, items (List), totalPrice
+    orders.value = data.buying.map(o => ({
+      id: o.orderId,
+      orderNo: `No.${o.orderId}`,
+      sellerName: o.sellerName, // Now using real seller account from DTO
+      bookNames: o.items.map(i => i.productName),
+      isbns: o.items.map(i => i.isbn),
+      prices: o.items.map(i => i.price),
+      amount: o.totalPrice,
+      location: o.meetupLocation,
+      date: o.meetupDate,
+      time: o.meetupTime,
+      status: o.status,
+      orderDate: new Date(o.createdAt).toLocaleDateString()
+    }));
+  } catch (err) {
+    console.error(err);
   }
 }
+
+async function cancelOrder(order) {
+  if (confirm(`確定要取消訂單 ${order.orderNo} 嗎？`)) {
+    try {
+      const response = await fetch(`http://localhost:8080/api/orders/${order.id}/cancel`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error("Failed to cancel");
+      
+      // Update local status
+      order.status = '取消';
+      alert("訂單已取消");
+    } catch (err) {
+      console.error(err);
+      alert("取消失敗");
+    }
+  }
+}
+
+onMounted(() => {
+  fetchOrders();
+});
 </script>
+

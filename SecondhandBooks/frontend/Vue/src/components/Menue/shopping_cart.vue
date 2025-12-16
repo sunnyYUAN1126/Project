@@ -27,13 +27,14 @@ async function fetchCart() {
     const data = await response.json();
     
     // 轉換成前端需要的格式 (API return CartItemDTO)
-    // DTO fields: cartId, productId, productName, productPrice, sellerName, coverImage
+    // DTO fields: cartId, productId, productName, productPrice, sellerName, coverImage, sellerId
     cart.value = data.map(item => ({
       cartId: item.cartId,
       productId: item.productId,
       name: item.productName,
       price: item.productPrice,
-      seller: item.sellerName || '未知賣家', 
+      seller: item.sellerName || '未知賣家',
+      sellerId: item.sellerId, // New field
       coverImage: item.coverImage
     }));
   } catch (error) {
@@ -51,7 +52,7 @@ watch(() => props.userId, (newVal) => {
   }
 }, { immediate: true });
 
-// 分組：依賣家分組
+// 分組：依賣家分組 (Use Seller Name as key for display, assume unique or acceptable)
 var groupedCart = computed(() => {
   const groups = {};
   cart.value.forEach(item => {
@@ -143,21 +144,48 @@ async function confirmCheckout() {
     }
   }
 
-  let message = `結帳成功！（模擬）\n\n`;
-  for (const seller of Object.keys(groupedCart.value)) {
-    const info = checkoutInfo.value[seller];
-    message += `${seller} 小計 $${sellerSubtotal(groupedCart.value[seller])}\n`;
-    message += `面交地點：${info.location}\n面交日期：${info.date}\n面交時間：${info.time}\n\n`;
+  // Iterate over each seller group and create order
+  try {
+      for (const sellerName of Object.keys(groupedCart.value)) {
+          const items = groupedCart.value[sellerName];
+          if (items.length === 0) continue;
+          
+          const sellerId = items[0].sellerId;
+          const info = checkoutInfo.value[sellerName];
+          
+          const request = {
+              sellerId: sellerId,
+              meetupLocation: info.location,
+              meetupDate: info.date,
+              meetupTime: info.time
+          };
+          
+          const response = await fetch('http://localhost:8080/api/orders/checkout', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(request),
+              credentials: 'include'
+          });
+          
+          if (!response.ok) {
+              const errMsg = await response.text();
+              throw new Error(`Failed to checkout for seller ${sellerName}: ${errMsg}`);
+          }
+      }
+      
+      alert("結帳成功！");
+      cart.value = [];
+      showCheckoutConfirm.value = false;
+      checkoutInfo.value = {};
+      
+  } catch (e) {
+      console.error(e);
+      alert("結帳發生錯誤: " + e.message);
   }
-  message += `總金額 $${total.value}`;
-  alert(message);
-  
-  // 因為沒有真實結帳API，這裡只做前端清空，或者可以逐筆刪除
-  // 為求演示，這裡僅清空前端，真實情況應呼叫後端建立訂單並清空購物車
-  cart.value = [];
-  showCheckoutConfirm.value = false;
-  checkoutInfo.value = {};
 }
+
 </script>
 
 <template>

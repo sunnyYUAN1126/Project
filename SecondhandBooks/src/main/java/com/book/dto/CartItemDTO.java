@@ -6,7 +6,16 @@ public class CartItemDTO {
     private String productName;
     private Integer productPrice;
     private String sellerName;
+    private Long sellerId;
     private String coverImage;
+
+    public Long getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(Long sellerId) {
+        this.sellerId = sellerId;
+    }
 
     public Long getCartId() {
         return cartId;
