@@ -40,7 +40,7 @@ CREATE TABLE `carts` (
   KEY `fk_cart_product` (`product_id`),
   CONSTRAINT `fk_cart_buyer` FOREIGN KEY (`buyer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_cart_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,7 +68,7 @@ CREATE TABLE `order_items` (
   KEY `fk_order_items_product` (`product_id`),
   CONSTRAINT `fk_order_items_orders` FOREIGN KEY (`orders_id`) REFERENCES `orders` (`orders_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_order_items_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -77,7 +77,7 @@ CREATE TABLE `order_items` (
 
 LOCK TABLES `order_items` WRITE;
 /*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
-INSERT INTO `order_items` VALUES (13,11,76);
+INSERT INTO `order_items` VALUES (13,11,76),(14,12,77);
 /*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -103,7 +103,7 @@ CREATE TABLE `orders` (
   KEY `fk_orders_seller` (`seller_id`),
   CONSTRAINT `fk_orders_buyer` FOREIGN KEY (`buyer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_orders_seller` FOREIGN KEY (`seller_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,7 +112,7 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (11,3,2,'文學院前門','2025-12-18','第六節下課','待面交','2025-12-17 11:33:42','2025-12-17 11:33:42');
+INSERT INTO `orders` VALUES (11,3,2,'文學院前門','2025-12-18','第六節下課','待面交','2025-12-17 11:33:42','2025-12-17 15:20:39'),(12,3,2,'文學院前門','2025-12-25','第四節下課','待面交','2025-12-17 15:12:47','2025-12-17 15:20:39');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -131,7 +131,7 @@ CREATE TABLE `product_images` (
   PRIMARY KEY (`image_id`),
   KEY `fk_images_product` (`product_id`),
   CONSTRAINT `fk_images_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`product_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=76 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -140,7 +140,7 @@ CREATE TABLE `product_images` (
 
 LOCK TABLES `product_images` WRITE;
 /*!40000 ALTER TABLE `product_images` DISABLE KEYS */;
-INSERT INTO `product_images` VALUES (1,1,'D:\\Project\\picture\\1-1.jpg',1),(2,1,'D:\\Project\\picture\\1-2.jpg',2),(3,1,'D:\\Project\\picture\\1-3.jpg',3),(12,16,'D:\\Project\\picture\\9789866327261-1.jpg',1),(13,16,'D:\\Project\\picture\\9789866327261-2.jpg',2),(14,18,'D:\\Project\\picture\\9786263174153-1.jpg',1),(15,18,'D:\\Project\\picture\\9786263174153-2.jpg',2),(16,18,'D:\\Project\\picture\\9786263174153-3.jpg',3),(17,19,'D:\\Project\\picture\\9789571143859-1.jpg',1),(18,19,'D:\\Project\\picture\\9789571143859-2.jpg',2),(19,19,'D:\\Project\\picture\\9789571143859-3.jpg',3),(20,20,'D:\\Project\\picture\\9789863626909-1.jpg',1),(21,20,'D:\\Project\\picture\\9789863626909-2.jpg',2),(22,20,'D:\\Project\\picture\\9789863626909-3.jpg',3),(23,17,'D:\\Project\\picture\\9789866438714-1.jpg',1),(24,17,'D:\\Project\\picture\\9789866438714-2.jpg',2),(25,17,'D:\\Project\\picture\\9789866438714-3.jpg',3),(26,21,'D:\\Project\\picture\\9789864125470.jpg',1),(27,22,'D:\\Project\\picture\\9789864127894.jpg',1),(28,23,'D:\\Project\\picture\\9789863413042-1.jpg',1),(29,23,'D:\\Project\\picture\\9789863413042-2.jpg',2),(30,23,'D:\\Project\\picture\\9789863413042-3.jpg',3),(31,24,'D:\\Project\\picture\\9789869684538.jpg',1),(32,25,'D:\\Project\\picture\\9789869743211-1.jpg',1),(33,25,'D:\\Project\\picture\\9789869743211-2.jpg',2),(34,26,'D:\\Project\\picture\\9789861266312-1.jpg',1),(35,26,'D:\\Project\\picture\\9789861266312-2.jpg',2),(36,26,'D:\\Project\\picture\\9789861266312-3.jpg',3),(37,2,'D:\\Project\\picture\\2-1.jpg',1),(38,2,'D:\\Project\\picture\\2-2.jpg',2),(39,2,'D:\\Project\\picture\\2-3.jpg',3),(40,8,'D:\\Project\\picture\\2-4.jpg',1),(41,3,'D:\\Project\\picture\\3-1.jpg',1),(42,3,'D:\\Project\\picture\\3-2.jpg',2),(43,3,'D:\\Project\\picture\\3-3.jpg',3),(44,9,'D:\\Project\\picture\\3-4.jpg',1),(45,4,'D:\\Project\\picture\\4-1.jpg',1),(46,4,'D:\\Project\\picture\\4-2.jpg',2),(47,10,'D:\\Project\\picture\\4-3.jpg',1),(48,10,'D:\\Project\\picture\\4-4.jpg',2),(49,5,'D:\\Project\\picture\\5-1.jpg',1),(50,5,'D:\\Project\\picture\\5-2.jpg',2),(51,5,'D:\\Project\\picture\\5-3.jpg',3),(52,6,'D:\\Project\\picture\\6-1.jpg',1),(53,6,'D:\\Project\\picture\\6-2.jpg',2),(54,6,'D:\\Project\\picture\\6-3.jpg',3),(55,7,'D:\\Project\\picture\\1-4.jpg',1),(56,13,'D:\\Project\\picture\\1-5.jpg',1),(57,14,'D:\\Project\\picture\\1-6.jpg',1),(58,15,'D:\\Project\\picture\\1-7.jpg',1),(75,76,'http://localhost:8080/images/df589f9f-7a8e-4d24-b277-bc23f2fb7af0.jpg',1);
+INSERT INTO `product_images` VALUES (1,1,'D:\\Project\\picture\\1-1.jpg',1),(2,1,'D:\\Project\\picture\\1-2.jpg',2),(3,1,'D:\\Project\\picture\\1-3.jpg',3),(12,16,'D:\\Project\\picture\\9789866327261-1.jpg',1),(13,16,'D:\\Project\\picture\\9789866327261-2.jpg',2),(14,18,'D:\\Project\\picture\\9786263174153-1.jpg',1),(15,18,'D:\\Project\\picture\\9786263174153-2.jpg',2),(16,18,'D:\\Project\\picture\\9786263174153-3.jpg',3),(17,19,'D:\\Project\\picture\\9789571143859-1.jpg',1),(18,19,'D:\\Project\\picture\\9789571143859-2.jpg',2),(19,19,'D:\\Project\\picture\\9789571143859-3.jpg',3),(20,20,'D:\\Project\\picture\\9789863626909-1.jpg',1),(21,20,'D:\\Project\\picture\\9789863626909-2.jpg',2),(22,20,'D:\\Project\\picture\\9789863626909-3.jpg',3),(23,17,'D:\\Project\\picture\\9789866438714-1.jpg',1),(24,17,'D:\\Project\\picture\\9789866438714-2.jpg',2),(25,17,'D:\\Project\\picture\\9789866438714-3.jpg',3),(26,21,'D:\\Project\\picture\\9789864125470.jpg',1),(27,22,'D:\\Project\\picture\\9789864127894.jpg',1),(28,23,'D:\\Project\\picture\\9789863413042-1.jpg',1),(29,23,'D:\\Project\\picture\\9789863413042-2.jpg',2),(30,23,'D:\\Project\\picture\\9789863413042-3.jpg',3),(31,24,'D:\\Project\\picture\\9789869684538.jpg',1),(32,25,'D:\\Project\\picture\\9789869743211-1.jpg',1),(33,25,'D:\\Project\\picture\\9789869743211-2.jpg',2),(34,26,'D:\\Project\\picture\\9789861266312-1.jpg',1),(35,26,'D:\\Project\\picture\\9789861266312-2.jpg',2),(36,26,'D:\\Project\\picture\\9789861266312-3.jpg',3),(37,2,'D:\\Project\\picture\\2-1.jpg',1),(38,2,'D:\\Project\\picture\\2-2.jpg',2),(39,2,'D:\\Project\\picture\\2-3.jpg',3),(40,8,'D:\\Project\\picture\\2-4.jpg',1),(41,3,'D:\\Project\\picture\\3-1.jpg',1),(42,3,'D:\\Project\\picture\\3-2.jpg',2),(43,3,'D:\\Project\\picture\\3-3.jpg',3),(44,9,'D:\\Project\\picture\\3-4.jpg',1),(45,4,'D:\\Project\\picture\\4-1.jpg',1),(46,4,'D:\\Project\\picture\\4-2.jpg',2),(47,10,'D:\\Project\\picture\\4-3.jpg',1),(48,10,'D:\\Project\\picture\\4-4.jpg',2),(49,5,'D:\\Project\\picture\\5-1.jpg',1),(50,5,'D:\\Project\\picture\\5-2.jpg',2),(51,5,'D:\\Project\\picture\\5-3.jpg',3),(52,6,'D:\\Project\\picture\\6-1.jpg',1),(53,6,'D:\\Project\\picture\\6-2.jpg',2),(54,6,'D:\\Project\\picture\\6-3.jpg',3),(55,7,'D:\\Project\\picture\\1-4.jpg',1),(56,13,'D:\\Project\\picture\\1-5.jpg',1),(57,14,'D:\\Project\\picture\\1-6.jpg',1),(58,15,'D:\\Project\\picture\\1-7.jpg',1),(75,76,'http://localhost:8080/images/df589f9f-7a8e-4d24-b277-bc23f2fb7af0.jpg',1),(76,77,'http://localhost:8080/images/08f45bb9-9b60-4c4c-ae01-a301caa025e6.jpg',1);
 /*!40000 ALTER TABLE `product_images` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -165,14 +165,14 @@ CREATE TABLE `products` (
   `product_price` int NOT NULL,
   `product_stock` int DEFAULT '1',
   `shelf_status` enum('上架','下架','交易中','已售出') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `admin_review` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT '待審核',
+  `admin_review` enum('待審核','審核通過','審核不通過') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `admin_note` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`product_id`),
   KEY `fk_products_seller` (`seller_id`),
   CONSTRAINT `fk_products_seller` FOREIGN KEY (`seller_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=77 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -181,7 +181,7 @@ CREATE TABLE `products` (
 
 LOCK TABLES `products` WRITE;
 /*!40000 ALTER TABLE `products` DISABLE KEYS */;
-INSERT INTO `products` VALUES (1,2,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','九成','無','書頁泛黃',50,1,'上架','審核通過','','2025-12-05 16:09:41','2025-12-17 10:42:44'),(2,2,'9789869462686','運籌視野之供應鏈管理 (10版)','商業管理類','John J. Coyle, C. John Langley, Jr., Robert A. Novack, Brian J. Gibson','東華','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-11 10:37:55'),(3,2,'9789865774998','資料庫的核心理論與實務 (7版)','商業管理類','黃三益','前程文化事業股份有限公司','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(4,2,'9789867433633','經濟學概論(三版)','商業管理類','胡春田/巫和懋/霍德明/熊秉元','雙葉書廊','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(5,2,'9789579282130','統計學：基礎與應用','商業管理類','Gerald Keller','新加坡商聖智學習亞洲私人有限公','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-11 10:34:03'),(6,2,'9789865774141','管理學: 整合觀點與創新思維 (第4版)','商業管理類','中山大學企業管理學系','前程文化事業股份有限公司','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-11 10:34:03'),(7,3,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','八成','少量','',10,1,'上架','審核通過',NULL,'2025-12-06 16:09:41','2025-12-17 10:10:46'),(8,3,'9789869462686','運籌視野之供應鏈管理 (10版)','商業管理類','John J. Coyle, C. John Langley, Jr., Robert A. Novack, Brian J. Gibson','東華','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(9,3,'9789865774998','資料庫的核心理論與實務 (7版)','商業管理類','黃三益','前程文化事業股份有限公司','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(10,3,'9789867433633','經濟學概論(三版)','商業管理類','胡春田/巫和懋/霍德明/熊秉元','雙葉書廊','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(13,4,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','一成','無','第六頁缺損',110,1,'上架','審核通過',NULL,'2025-12-01 16:09:41','2025-12-11 15:01:49'),(14,5,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','六成','無','',5,1,'上架','審核通過',NULL,'2025-12-01 16:09:41','2025-12-11 15:49:28'),(15,6,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','九成','無','書頁泛黃',130,1,'上架','審核通過',NULL,'2025-12-01 16:09:41','2025-12-11 15:01:49'),(16,7,'9789866327261','台灣文學史綱','文學類','葉石濤','春暉','六成','無','封面微舊，內頁乾淨，閱讀無障礙。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-16 14:15:19'),(17,7,'9789866438714','大家的日本語 中級I 文法解說・問題解答・聽解內容','文學類','株式会社スリーエーネットワーク','大新書局','六成','無','書況約六成，偶有折角，內容保持良好。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-16 14:15:19'),(18,8,'9786263174153','中華民國憲法精義（七版）','社會科學類','呂炳寬/項程華/楊智','五南','六成','無','正常使用痕跡，無劃線，保存完整。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(19,8,'9789571143859','社會學概要','社會科學類','蔡文輝/李紹嶸','五南','六成','無','封面略舊，內頁乾淨，閱讀流暢。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(20,8,'9789863626909','新編心理學概要(二版修訂版)','社會科學類','李玉蟬','華格那','六成','無','翻閱痕跡輕微，書況良好。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(21,9,'9789864125470','化學反應工程原理','理工資訊類','H. Scott Fogler','高立圖書','六成','無','封面輕微磨損，內容完整。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(22,9,'9789864127894','化工程序設計概論','理工資訊類','呂維明/錢義隆/黃孝平/余政靖','高立圖書','六成','無','書況正常，內頁無破損。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-16 13:47:32'),(23,9,'9789863413042','單元操作：流力與熱傳分析 7/e','理工資訊類','Warren L. McCabe/Julian C. Smith/Peter Harriott','東華','六成','無','一般使用痕跡，整體保存良好。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(24,10,'9789869684538','Robbins 基礎病理學 (10/e)','醫學健康類','李恆昇','合記','六成','無','封面稍舊但內頁完整，看起來舒服。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-17 11:26:09'),(25,10,'9789869743211','Netter\'s 人體解剖學圖譜（第七版）','醫學健康類','John T. Hansen','力大圖書','六成','無','大型圖譜輕微折損但內容清晰。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-17 11:26:09'),(26,10,'9789861266312','臨床解剖學精華','醫學健康類','Keith L. Moore','合記','六成','無','封面普通舊化，內頁乾淨無筆記。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-16 16:12:41'),(76,2,'123','123','文學類','123','123','一成','大量','123',123,1,'交易中','審核通過','','2025-12-17 11:32:44','2025-12-17 11:33:42');
+INSERT INTO `products` VALUES (1,2,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','九成','無','書頁泛黃',50,1,'上架','待審核','','2025-12-05 16:09:41','2025-12-17 15:49:27'),(2,2,'9789869462686','運籌視野之供應鏈管理 (10版)','商業管理類','John J. Coyle, C. John Langley, Jr., Robert A. Novack, Brian J. Gibson','東華','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-11 10:37:55'),(3,2,'9789865774998','資料庫的核心理論與實務 (7版)','商業管理類','黃三益','前程文化事業股份有限公司','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(4,2,'9789867433633','經濟學概論(三版)','商業管理類','胡春田/巫和懋/霍德明/熊秉元','雙葉書廊','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(5,2,'9789579282130','統計學：基礎與應用','商業管理類','Gerald Keller','新加坡商聖智學習亞洲私人有限公','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-11 10:34:03'),(6,2,'9789865774141','管理學: 整合觀點與創新思維 (第4版)','商業管理類','中山大學企業管理學系','前程文化事業股份有限公司','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-11 10:34:03'),(7,3,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','八成','少量','',10,1,'上架','審核通過',NULL,'2025-12-06 16:09:41','2025-12-17 10:10:46'),(8,3,'9789869462686','運籌視野之供應鏈管理 (10版)','商業管理類','John J. Coyle, C. John Langley, Jr., Robert A. Novack, Brian J. Gibson','東華','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(9,3,'9789865774998','資料庫的核心理論與實務 (7版)','商業管理類','黃三益','前程文化事業股份有限公司','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(10,3,'9789867433633','經濟學概論(三版)','商業管理類','胡春田/巫和懋/霍德明/熊秉元','雙葉書廊','九成','無','',100,1,'上架','審核通過',NULL,'2025-12-04 16:09:41','2025-12-04 16:09:41'),(13,4,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','一成','無','第六頁缺損',110,1,'上架','審核通過',NULL,'2025-12-01 16:09:41','2025-12-11 15:01:49'),(14,5,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','六成','無','',5,1,'上架','審核通過',NULL,'2025-12-01 16:09:41','2025-12-11 15:49:28'),(15,6,'9789865030612','計算機概論: 當代資訊通鑑 (第14版)','商業管理類','趙坤茂/ 張雅惠/ 黃俊穎/ 黃寶萱','全華圖書股份有限公司','九成','無','書頁泛黃',130,1,'上架','審核通過',NULL,'2025-12-01 16:09:41','2025-12-11 15:01:49'),(16,7,'9789866327261','台灣文學史綱','文學類','葉石濤','春暉','六成','無','封面微舊，內頁乾淨，閱讀無障礙。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-16 14:15:19'),(17,7,'9789866438714','大家的日本語 中級I 文法解說・問題解答・聽解內容','文學類','株式会社スリーエーネットワーク','大新書局','六成','無','書況約六成，偶有折角，內容保持良好。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-16 14:15:19'),(18,8,'9786263174153','中華民國憲法精義（七版）','社會科學類','呂炳寬/項程華/楊智','五南','六成','無','正常使用痕跡，無劃線，保存完整。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(19,8,'9789571143859','社會學概要','社會科學類','蔡文輝/李紹嶸','五南','六成','無','封面略舊，內頁乾淨，閱讀流暢。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(20,8,'9789863626909','新編心理學概要(二版修訂版)','社會科學類','李玉蟬','華格那','六成','無','翻閱痕跡輕微，書況良好。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(21,9,'9789864125470','化學反應工程原理','理工資訊類','H. Scott Fogler','高立圖書','六成','無','封面輕微磨損，內容完整。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(22,9,'9789864127894','化工程序設計概論','理工資訊類','呂維明/錢義隆/黃孝平/余政靖','高立圖書','六成','無','書況正常，內頁無破損。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-16 13:47:32'),(23,9,'9789863413042','單元操作：流力與熱傳分析 7/e','理工資訊類','Warren L. McCabe/Julian C. Smith/Peter Harriott','東華','六成','無','一般使用痕跡，整體保存良好。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-11 09:16:55'),(24,10,'9789869684538','Robbins 基礎病理學 (10/e)','醫學健康類','李恆昇','合記','六成','無','封面稍舊但內頁完整，看起來舒服。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-17 11:26:09'),(25,10,'9789869743211','Netter\'s 人體解剖學圖譜（第七版）','醫學健康類','John T. Hansen','力大圖書','六成','無','大型圖譜輕微折損但內容清晰。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-17 11:26:09'),(26,10,'9789861266312','臨床解剖學精華','醫學健康類','Keith L. Moore','合記','六成','無','封面普通舊化，內頁乾淨無筆記。',500,1,'上架','審核通過',NULL,'2025-12-11 09:14:01','2025-12-16 16:12:41'),(76,2,'123','123','文學類','123','123','一成','大量','123',123,1,'交易中','審核通過','','2025-12-17 11:32:44','2025-12-17 15:46:02'),(77,2,'1111111111111','貓','文學類','奶油','汐止','四成','少量','有貓腳印',130,1,'交易中','審核通過','','2025-12-17 14:49:42','2025-12-17 15:20:17');
 /*!40000 ALTER TABLE `products` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -226,4 +226,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-17 14:47:22
+-- Dump completed on 2025-12-17 15:57:38
