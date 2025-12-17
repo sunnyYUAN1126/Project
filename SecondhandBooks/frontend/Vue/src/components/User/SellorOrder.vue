@@ -1,7 +1,9 @@
 <template>
   <div class="container mt-4" >
+    <h2 class="text-center fw-bold mb-4">訂單管理</h2>
+
     <!-- 切換按鈕 -->
-    <div class="mb-4 d-flex gap-2 my-5">
+    <div class="mb-4 d-flex gap-2 justify-content-center">
       <button
         @click="currentTab = 'current'"
         :class="currentTab === 'current' ? 'btn btn-dark' : 'btn btn-outline-dark'"
@@ -17,11 +19,10 @@
     </div>
 
     <!-- Container for List -->
-    <div>
-      <h3 class="fw-bold mb-4">{{ currentTab === 'current' ? '目前訂單' : '交易歷史' }}</h3>
-      
+    <div>     
       <div class="row justify-content-center">
         <div class="col-md-8">
+          <h4 class="fw-bold mb-3">{{ currentTab === 'current' ? '目前訂單' : '交易歷史' }}</h4>
           <div v-for="order in (currentTab === 'current' ? currentOrders : historyOrders)" :key="order.id" class="card mb-3 shadow-sm" style="border: 2px solid #ccc; border-radius: 20px; overflow: hidden;">
               <!-- Card Header -->
               <div class="card-header bg-white border-0 pt-2 px-3 d-flex justify-content-between align-items-center">
@@ -82,8 +83,8 @@
                           <div class="mb-0 fw-bold">{{ item.productName }}</div>
                           <div class="text-muted small" style="font-size: 0.85rem;">
                              二手書資訊：
-                             <span v-if="item.productNew">{{ item.productNew }}</span>
-                             <span v-if="item.productClassNote">、{{ item.productClassNote }}</span>
+                             <span v-if="item.productNew">{{ item.productNew }}新</span>
+                             <span v-if="item.productClassNote">、{{ item.productClassNote }}筆記</span>
                              <span v-if="item.productNote">、{{ item.productNote }}</span>
                           </div>
                        </div>

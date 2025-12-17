@@ -1,10 +1,27 @@
 <template>
   <div class="container mt-4">
     <h2 class="text-center fw-bold mb-4">我的訂單</h2>
+
+    <!-- 切換按鈕 -->
+    <div class="mb-4 d-flex gap-2 justify-content-center">
+      <button
+        @click="currentTab = 'current'"
+        :class="currentTab === 'current' ? 'btn btn-dark' : 'btn btn-outline-dark'"
+      >
+        目前訂單
+      </button>
+      <button
+        @click="currentTab = 'history'"
+        :class="currentTab === 'history' ? 'btn btn-dark' : 'btn btn-outline-dark'"
+      >
+        交易歷史
+      </button>
+    </div>
     
     <div class="row justify-content-center">
       <div class="col-md-8">
-        <div v-for="order in orders" :key="order.id" class="card mb-3 shadow-sm" style="border: 2px solid #ccc; border-radius: 20px; overflow: hidden;">
+        <h4 class="fw-bold mb-3">{{ currentTab === 'current' ? '目前訂單' : '交易歷史' }}</h4>
+        <div v-for="order in (currentTab === 'current' ? currentOrders : historyOrders)" :key="order.id" class="card mb-3 shadow-sm" style="border: 2px solid #ccc; border-radius: 20px; overflow: hidden;">
           <!-- Card Header -->
           <div class="card-header bg-white border-0 pt-2 px-3 d-flex justify-content-between align-items-center">
              <span class="fw-bold">訂單編號 {{ order.orderNo }}</span>
@@ -47,8 +64,8 @@
                       <div class="mb-0 fw-bold">{{ item.productName }}</div>
                       <div class="text-muted small" style="font-size: 0.85rem;">
                          二手書資訊：
-                         <span v-if="item.productNew">{{ item.productNew }}</span>
-                         <span v-if="item.productClassNote">、{{ item.productClassNote }}</span>
+                         <span v-if="item.productNew">{{ item.productNew }}新</span>
+                         <span v-if="item.productClassNote">、{{ item.productClassNote }}筆記</span>
                          <span v-if="item.productNote">、{{ item.productNote }}</span>
                       </div>
                    </div>
@@ -95,7 +112,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
-const orders = ref([]);
+const currentTab = ref('current');
+const currentOrders = ref([]);
+const historyOrders = ref([]);
 
 async function fetchOrders() {
   try {
@@ -105,18 +124,30 @@ async function fetchOrders() {
     if (!response.ok) throw new Error("Failed to fetch orders");
     const data = await response.json();
     
-    orders.value = data.buying.map(o => ({
-      id: o.orderId,
-      orderNo: `No.${o.orderId}`,
-      sellerName: o.sellerName,
-      items: o.items, // Pass full items list with details
-      amount: o.totalPrice,
-      location: o.meetupLocation,
-      date: o.meetupDate,
-      time: o.meetupTime,
-      status: o.status,
-      orderDate: new Date(o.createdAt).toLocaleDateString()
-    }));
+    // Clear
+    currentOrders.value = [];
+    historyOrders.value = [];
+
+    data.buying.forEach(o => {
+      const order = {
+        id: o.orderId,
+        orderNo: `No.${o.orderId}`,
+        sellerName: o.sellerName,
+        items: o.items, // Pass full items list with details
+        amount: o.totalPrice,
+        location: o.meetupLocation,
+        date: o.meetupDate,
+        time: o.meetupTime,
+        status: o.status,
+        orderDate: new Date(o.createdAt).toLocaleDateString()
+      };
+
+      if (order.status === '待面交') {
+        currentOrders.value.push(order);
+      } else {
+        historyOrders.value.push(order);
+      }
+    });
   } catch (err) {
     console.error(err);
   }
@@ -133,6 +164,13 @@ async function cancelOrder(order) {
       
       order.status = '取消';
       alert("訂單已取消");
+      
+      // Move to history
+      const index = currentOrders.value.indexOf(order);
+      if (index > -1) {
+          currentOrders.value.splice(index, 1);
+          historyOrders.value.push(order);
+      }
     } catch (err) {
       console.error(err);
       alert("取消失敗");

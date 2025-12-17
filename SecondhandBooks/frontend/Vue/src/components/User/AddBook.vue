@@ -61,8 +61,8 @@
             <label class="form-label">是否有筆記：</label>
             <select class="form-select bg-light-gray" v-model="form.notes">
               <option value="無">無筆記</option>
-              <option value="少量筆記">少量筆記</option>
-              <option value="大量筆記">大量筆記</option>
+              <option value="少量">少量筆記</option>
+              <option value="大量">大量筆記</option>
             </select>
           </div>
         </div>

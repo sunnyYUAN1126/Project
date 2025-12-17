@@ -18,7 +18,7 @@ const selectCategory = (category) => {
   }
 }
 
-// 搜尋功能 (模擬)
+// 搜尋功能 
 const searchQuery = ref('');
 const handleSearch = () => {
     // console.log("搜尋:", searchQuery.value);

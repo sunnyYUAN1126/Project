@@ -263,7 +263,7 @@ async function confirmCheckout() {
           總金額：${{ total }}
         </div>
 
-        <button class="btn-checkout mb-2" @click="confirmCheckout">立即結帳 (模擬)</button>
+        <button class="btn-checkout mb-2" @click="confirmCheckout">立即結帳</button>
         <button class="btn-back" @click="showCheckoutConfirm = false">返回上一頁</button>
       </div>
     </template>

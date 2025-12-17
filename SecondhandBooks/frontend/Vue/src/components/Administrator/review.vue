@@ -137,7 +137,7 @@ const approve = async (book) => {
     await axios.post(`http://localhost:8080/api/books/review/${book.id}`, payload, {
       withCredentials: true
     })
-    alert(`已同意：書籍ID ${book.id} 上架`)
+    alert(`已同意${book.user}上架書籍\n書籍ID:${book.id}\nISBN: ${book.isbn}\n書名: ${book.title}`)
     fetchPendingBooks() // Refresh list
   } catch (error) {
     console.error("Error approving book:", error)
@@ -154,7 +154,7 @@ const reject = async (book) => {
     await axios.post(`http://localhost:8080/api/books/review/${book.id}`, payload, {
       withCredentials: true
     })
-    alert(`已拒絕：書籍ID ${book.id} 上架`)
+    alert(`已拒絕${book.user}上架書籍\n書籍ID:${book.id}\nISBN: ${book.isbn}\n書名: ${book.title}`)
     fetchPendingBooks() // Refresh list
   } catch (error) {
     console.error("Error rejecting book:", error)
