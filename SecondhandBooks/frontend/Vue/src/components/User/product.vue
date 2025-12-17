@@ -71,7 +71,14 @@
               {{ item.adminStatus === "審核通過" ? "上架" : "下架" }}
             </td>
             <td>
-              <button class="btn btn-danger btn-sm" @click="deleteBook(index, item.id)">刪除</button>
+              <button 
+                class="btn btn-danger btn-sm" 
+                @click="deleteBook(index, item.id)"
+                :disabled="item.shelfStatus === '交易中'"
+                :title="item.shelfStatus === '交易中' ? '交易中無法刪除' : '刪除此書籍'"
+              >
+                刪除
+              </button>
             </td>
           </tr>
         </tbody>
