@@ -99,7 +99,7 @@ function adminLogout() {
           <li @click="showMemberAreaPage" class="d-flex align-items-center">
             <img v-if="userPicture" :src="userPicture" alt="User" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 8px; object-fit: cover;">
             <div v-else style="width: 50px; height: 50px; border-radius: 50%; margin-right: 8px; background-color: lightblue; display: flex; justify-content: center; align-items: center;">
-              <i class="bi bi-person-fill" style="color: white;"></i>
+              <i class="bi bi-person-fill" style="color: white; font-size: 25px;"></i>
             </div>
             {{ userName }}
           </li>
