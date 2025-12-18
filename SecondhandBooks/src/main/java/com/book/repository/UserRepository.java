@@ -10,4 +10,7 @@ public interface UserRepository extends ListCrudRepository<User, Long> {
 
     // 檢查帳號是否存在 (用於註冊檢查)
     boolean existsByAccount(String account);
+
+    // 模糊搜尋帳號
+    java.util.List<User> findByAccountContaining(String keyword);
 }

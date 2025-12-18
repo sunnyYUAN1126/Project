@@ -83,4 +83,56 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "未登入"));
         }
     }
+
+    // === 會員管理 API (需權限控管) ===
+
+    @GetMapping
+    public ResponseEntity<java.util.List<Map<String, Object>>> getUsers(
+            @RequestParam(name = "search", required = false) String search) {
+
+        java.util.List<User> users = userService.searchUsers(search);
+
+        // Convert to response map (handle binary image)
+        java.util.List<Map<String, Object>> response = users.stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("user_id", u.getUserId());
+            map.put("account", u.getAccount());
+            map.put("password", u.getPassword()); // As requested, though usually unsafe
+            map.put("student_id", u.getStudentId());
+            map.put("department", u.getDepartment());
+            map.put("role", u.getRole());
+            map.put("created_at", u.getCreatedAt());
+            map.put("updated_at", u.getUpdatedAt());
+
+            if (u.getUserPicture() != null) {
+                String base64 = java.util.Base64.getEncoder().encodeToString(u.getUserPicture());
+                map.put("user_picture", "data:image/jpeg;base64," + base64);
+            } else {
+                map.put("user_picture", null);
+            }
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody User user) {
+        String result = userService.updateUser(id, user);
+        if ("更新成功".equals(result)) {
+            return ResponseEntity.ok(Map.of("message", result));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", result));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
+        String result = userService.deleteUser(id);
+        if ("刪除成功".equals(result)) {
+            return ResponseEntity.ok(Map.of("message", result));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", result));
+        }
+    }
 }

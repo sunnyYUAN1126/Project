@@ -1,5 +1,6 @@
 <script setup>
 import review from './review.vue'
+import member from './member.vue'
 
 import { ref } from 'vue'
 const currentPage = ref('review')
@@ -22,12 +23,19 @@ function switchPage(page) {
          @click="switchPage('review')">
         書籍審核
       </a>
-      
+
+      <a class="nav-link"
+         :class="{ active: currentPage === 'member' }"
+         @click="switchPage('member')">
+        會員管理
+      </a>
+
     </nav>
 
     <!-- 主要內容 -->
     <div class="content">
       <review v-show="currentPage === 'review'" />
+      <member v-show="currentPage === 'member'" />
     </div>
 
   </div>

@@ -68,4 +68,38 @@ public class UserService {
         }
         return null; // 登入失敗
     }
+
+    // === 會員管理功能 (Admin Use) ===
+
+    public java.util.List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public java.util.List<User> searchUsers(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllUsers();
+        }
+        return userRepository.findByAccountContaining(keyword);
+    }
+
+    public String updateUser(Long id, User userDetails) {
+        return userRepository.findById(id).map(user -> {
+            user.setStudentId(userDetails.getStudentId());
+            user.setDepartment(userDetails.getDepartment());
+            user.setRole(userDetails.getRole());
+            // 目前不提供後端改密碼功能，若要改需另做加密處理
+            // user.setPassword(userDetails.getPassword());
+
+            userRepository.save(user);
+            return "更新成功";
+        }).orElse("使用者不存在");
+    }
+
+    public String deleteUser(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return "刪除成功";
+        }
+        return "使用者不存在";
+    }
 }

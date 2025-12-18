@@ -55,8 +55,8 @@ const handleSearch = () => {
       </ul>          
     
       <form class="d-flex" role="search" @submit.prevent="handleSearch">
-        <input v-model="searchQuery" class="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
-        <button class="btn btn-outline-success" type="submit">
+        <input v-model="searchQuery" class="form-control me-2" type="search" placeholder="Search ISBN/Book" aria-label="Search ISBN/Book"/>
+        <button class="btn btn-morandi" type="submit">
           <i class="bi bi-search"></i>
         </button>
       </form>
@@ -84,5 +84,21 @@ const handleSearch = () => {
 .second-nav {
   top: 80px;  
   background-color: #eeeeee !important;
+}
+
+/* Morandi Search Button */
+.btn-morandi {
+  color: #8da399;
+  border-color: #8da399;
+}
+.btn-morandi:hover {
+  background-color: #8da399;
+  color: white;
+}
+
+/* Input Focus Glow */
+.form-control:focus {
+  border-color: #8da399 !important;
+  box-shadow: 0 0 0 0.25rem rgba(141, 163, 153, 0.25) !important;
 }
 </style>
