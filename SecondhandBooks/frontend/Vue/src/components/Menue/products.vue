@@ -7,6 +7,12 @@ import { ref, onMounted, computed, inject } from 'vue'
 const uniqueBookList = ref([]);
 const currentCategory = ref('ALL');
 
+// 分頁狀態
+// 分頁狀態
+const currentPage = ref(1);
+const totalPages = ref(1);
+const totalItems = ref(0);
+
 // 控制頁面狀態
 const showDetail = ref(false)
 const selectedBookInfo = ref(null) // 存書籍基本資訊
@@ -22,15 +28,24 @@ const currentImage = ref("")
 const API_BASE_URL = 'http://localhost:8080/api/books';
 
 // 取得書籍列表 (依分類)
-const fetchBooks = async (category) => {
+const fetchBooks = async (category, page = 1) => {
   try {
-    const url = category === 'ALL' 
-      ? `${API_BASE_URL}/unique` 
-      : `${API_BASE_URL}/unique?category=${encodeURIComponent(category)}`;
+    // 後端已經固定一頁為 6 個
+    let url = `${API_BASE_URL}/unique?page=${page}`;
+    if (category !== 'ALL') {
+      url += `&category=${encodeURIComponent(category)}`;
+    }
       
     const response = await fetch(url);
     if (!response.ok) throw new Error('Network response was not ok');
-    uniqueBookList.value = await response.json();
+    
+    // 解析 PageResult 結構
+    const data = await response.json();
+    uniqueBookList.value = data.list;
+    currentPage.value = data.currentPage;
+    totalPages.value = data.totalPages;
+    totalItems.value = data.totalCount;
+    
   } catch (error) {
     console.error('Error fetching books:', error);
     uniqueBookList.value = [];
@@ -114,15 +129,23 @@ function goBack() {
 // 接收外部 (Home.vue) 傳來的分類切換請求
 function filterByCategory(categoryName) {
   currentCategory.value = categoryName;
+  currentPage.value = 1; // 切換分類時重置頁碼
   // 切換分類時，如果正開著詳細頁，建議切回列表
   goBack();
   // 重新抓取資料
-  fetchBooks(categoryName);
+  fetchBooks(categoryName, 1);
+}
+
+// 換頁
+function changePage(page) {
+  if (page < 1 || page > totalPages.value) return;
+  fetchBooks(currentCategory.value, page);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // 初始化
 onMounted(() => {
-  fetchBooks('ALL');
+  fetchBooks('ALL', 1);
 });
 
 // 處理圖片 URL
@@ -161,15 +184,21 @@ const processImageUrl = (url) => {
 const searchBooks = async (query) => {
   if (!query || query.trim() === '') {
     // 如果搜尋字串為空，重置回全部
-    fetchBooks('ALL');
+    fetchBooks('ALL', 1);
     return;
   }
   
   try {
-    const url = `${API_BASE_URL}/search?query=${encodeURIComponent(query)}`;
+    // 移除 size 參數
+    const url = `${API_BASE_URL}/search?query=${encodeURIComponent(query)}&page=1`;
     const response = await fetch(url);
     if (!response.ok) throw new Error('Network response was not ok');
-    uniqueBookList.value = await response.json();
+    
+    const data = await response.json();
+    uniqueBookList.value = data.list;
+    currentPage.value = data.currentPage;
+    totalPages.value = data.totalPages;
+    totalItems.value = data.totalCount;
     
     // 搜尋時關閉詳細頁
     goBack();
@@ -238,6 +267,29 @@ defineExpose({
               <p class="card-text mt-2">總庫存: {{ book.totalStock }}</p>
             </div>
           </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div v-if="totalPages >= 1" class="col-12 mt-5 mb-3 d-flex justify-content-center w-100">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination mb-0">
+                    <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                        <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    
+                    <li v-for="p in totalPages" :key="p" class="page-item" :class="{ active: p === currentPage }">
+                        <a class="page-link" href="#" @click.prevent="changePage(p)">{{ p }}</a>
+                    </li>
+                    
+                    <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                        <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
       </div>
 
@@ -378,7 +430,42 @@ defineExpose({
   min-height: 100vh;
   border-radius: 10px;
 }
-.row{
+.row {
   padding: 30px;
+}
+
+/* Custom Pagination Styles */
+.page-item .page-link {
+  border-radius: 50% !important;
+  margin: 0 6px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dcdcdc; /* Lighter border */
+  color: #6c757d; /* Muted text */
+  background-color: #f8f9fa; /* Very light gray back */
+  transition: all 0.3s ease;
+}
+
+.page-item.active .page-link {
+  background-color: #8da399; /* Morandi Sage/Green-Grey */
+  border-color: #8da399;
+  color: white;
+  box-shadow: 0 4px 6px rgba(141, 163, 153, 0.4);
+}
+
+.page-item .page-link:hover {
+  background-color: #dbe4eb; /* Soft muted blue-gray for hover */
+  color: #6c757d;
+  border-color: #dbe4eb;
+  transform: translateY(-2px);
+}
+
+.page-item.active .page-link:hover {
+  background-color: #7a8f86; /* Darker sage for active hover */
+  border-color: #7a8f86;
+  color: white;
 }
 </style>

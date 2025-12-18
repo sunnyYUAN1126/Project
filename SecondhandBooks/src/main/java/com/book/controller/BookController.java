@@ -27,15 +27,20 @@ public class BookController {
     }
 
     @GetMapping("/unique")
-    public ResponseEntity<List<com.book.dto.BookSummaryDTO>> getUniqueBooks(
-            @RequestParam(name = "category", required = false) String category) {
-        List<com.book.dto.BookSummaryDTO> books = bookService.getUniqueBooks(category);
+    public ResponseEntity<com.book.dto.PageResult<com.book.dto.BookSummaryDTO>> getUniqueBooks(
+            @RequestParam(name = "category", required = false) String category,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        com.book.dto.PageResult<com.book.dto.BookSummaryDTO> books = bookService.getUniqueBooks(category, page, size);
         return ResponseEntity.ok(books);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<com.book.dto.BookSummaryDTO>> searchBooks(@RequestParam("query") String query) {
-        List<com.book.dto.BookSummaryDTO> books = bookService.searchBooks(query);
+    public ResponseEntity<com.book.dto.PageResult<com.book.dto.BookSummaryDTO>> searchBooks(
+            @RequestParam("query") String query,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        com.book.dto.PageResult<com.book.dto.BookSummaryDTO> books = bookService.searchBooks(query, page, size);
         return ResponseEntity.ok(books);
     }
 

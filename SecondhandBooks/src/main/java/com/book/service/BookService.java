@@ -49,30 +49,54 @@ public class BookService {
      * Get unique books grouped by ISBN.
      * Uses efficient database aggregation via Spring Data JDBC.
      */
-    public List<com.book.dto.BookSummaryDTO> getUniqueBooks(String category) {
+    public com.book.dto.PageResult<com.book.dto.BookSummaryDTO> getUniqueBooks(String category, int page, int size) {
+        if (page < 1)
+            page = 1;
+        // Enforce page size to 6 as per requirement, ignoring frontend input
+        size = 6;
+        int offset = (page - 1) * size;
+
         List<com.book.dto.BookSummaryDTO> details;
         List<com.book.dto.BookStockDTO> stocks;
+        long totalCount;
 
         if (category == null || category.trim().isEmpty() || "ALL".equalsIgnoreCase(category)) {
-            details = bookRepository.findAllBookDetails();
+            details = bookRepository.findBookDetails(size, offset);
+            totalCount = bookRepository.countAllBookDetails();
             stocks = bookRepository.findAllStocks();
         } else {
-            details = bookRepository.findBookDetailsByCategory(category);
+            details = bookRepository.findBookDetailsByCategory(category, size, offset);
+            totalCount = bookRepository.countBookDetailsByCategory(category);
             stocks = bookRepository.findStocksByCategory(category);
         }
 
-        return mergeStockIntoDetails(details, stocks);
+        List<com.book.dto.BookSummaryDTO> resultList = mergeStockIntoDetails(details, stocks);
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+
+        return new com.book.dto.PageResult<>(resultList, totalCount, totalPages, page);
     }
 
-    public List<com.book.dto.BookSummaryDTO> searchBooks(String query) {
+    public com.book.dto.PageResult<com.book.dto.BookSummaryDTO> searchBooks(String query, int page, int size) {
         if (query == null || query.trim().isEmpty()) {
-            return java.util.Collections.emptyList();
+            return new com.book.dto.PageResult<>(java.util.Collections.emptyList(), 0, 0, 1);
         }
+        if (page < 1)
+            page = 1;
+        // Enforce page size to 6 as per requirement
+        size = 6;
+        int offset = (page - 1) * size;
+
         String likeQuery = "%" + query.trim() + "%";
-        List<com.book.dto.BookSummaryDTO> details = bookRepository.findBookDetailsByNameContaining(likeQuery);
+        // Pass likeQuery to both methods as they use keyset pagination or just standard
+        List<com.book.dto.BookSummaryDTO> details = bookRepository.findBookDetailsByNameContaining(likeQuery, size,
+                offset);
+        long totalCount = bookRepository.countBookDetailsByNameContaining(likeQuery);
         List<com.book.dto.BookStockDTO> stocks = bookRepository.findStocksByNameContaining(likeQuery);
 
-        return mergeStockIntoDetails(details, stocks);
+        List<com.book.dto.BookSummaryDTO> resultList = mergeStockIntoDetails(details, stocks);
+        int totalPages = (int) Math.ceil((double) totalCount / size);
+
+        return new com.book.dto.PageResult<>(resultList, totalCount, totalPages, page);
     }
 
     private List<com.book.dto.BookSummaryDTO> mergeStockIntoDetails(
