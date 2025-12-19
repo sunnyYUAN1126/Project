@@ -26,7 +26,6 @@
                 <th>系級</th>
                 <th>角色</th>
                 <th>建立時間</th>
-                <th>更新時間</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -51,7 +50,6 @@
                   </span>
                 </td>
                 <td class="small text-secondary">{{ formatDate(user.created_at) }}</td>
-                <td class="small text-secondary">{{ formatDate(user.updated_at) }}</td>
                 <td>
                   <button class="btn btn-sm btn-outline-primary me-1" @click="openEditModal(user)">
                     <i class="bi bi-pencil-square"></i>
