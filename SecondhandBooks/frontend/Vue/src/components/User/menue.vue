@@ -49,10 +49,10 @@ function switchPage(page) {
 
     <!-- 右側內容 -->
     <div class="content">
-      <order v-show="currentPage === 'order'" />
-      <AddBook v-show="currentPage === 'AddBook'" />
-      <product v-show="currentPage === 'product'" />
-      <SellerOrder v-show="currentPage === 'sellerOrder'" />
+      <order v-if="currentPage === 'order'" />
+      <AddBook v-if="currentPage === 'AddBook'" />
+      <product v-if="currentPage === 'product'" />
+      <SellerOrder v-if="currentPage === 'sellerOrder'" />
     </div>
   </div>
 </template>

@@ -34,8 +34,8 @@ function switchPage(page) {
 
     <!-- 主要內容 -->
     <div class="content">
-      <review v-show="currentPage === 'review'" />
-      <member v-show="currentPage === 'member'" />
+      <review v-if="currentPage === 'review'" />
+      <member v-if="currentPage === 'member'" />
     </div>
 
   </div>

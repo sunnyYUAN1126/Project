@@ -366,7 +366,6 @@ public class BookService {
     public List<com.book.dto.BookListingDTO> getMyBooks(Long userId) {
         List<Book> myBooks = bookRepository.findBySellerId(userId);
         return myBooks.stream()
-                .filter(book -> book.getStock() != null && book.getStock() > 0)
                 .sorted(Comparator.comparing(Book::getCreatedAt, Comparator.reverseOrder()))
                 .map(this::convertToBookListingDTO)
                 .collect(Collectors.toList());
