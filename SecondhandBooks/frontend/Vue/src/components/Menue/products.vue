@@ -96,13 +96,20 @@ const sortedProductList = computed(() => {
       let valA = a[currentSortField.value]
       let valB = b[currentSortField.value]
       
-      // 處理 null 或 undefined
-      if (valA === null || valA === undefined) valA = ''
-      if (valB === null || valB === undefined) valB = ''
+      // 針對價格欄位轉為數字比較
+      if (currentSortField.value === 'price') {
+        valA = Number(valA)
+        valB = Number(valB)
+      } else {
+        // 其他欄位處理 null 或 undefined
+        if (valA === null || valA === undefined) valA = ''
+        if (valB === null || valB === undefined) valB = ''
+      }
 
-      if (valA > valB) return currentSortOrder.value === 'asc' ? 1 : -1
-      if (valA < valB) return currentSortOrder.value === 'asc' ? -1 : 1
-      return 0
+      if (valA === valB) return 0
+      
+      const result = valA > valB ? 1 : -1
+      return currentSortOrder.value === 'asc' ? result : -result
     })
   }
   return list
