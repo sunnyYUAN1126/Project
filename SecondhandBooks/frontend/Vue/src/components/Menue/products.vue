@@ -73,9 +73,17 @@ const fetchListings = async (isbn, name) => {
 // 排序邏輯
 // ==========================================
 const currentSortField = ref(null)
+const currentSortOrder = ref('asc') // 'asc' or 'desc'
 
 function setSort(field) {
-  currentSortField.value = field
+  if (currentSortField.value === field) {
+    // 同欄位點擊，切換排序方向
+    currentSortOrder.value = currentSortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    // 不同欄位，預設由小到大
+    currentSortField.value = field
+    currentSortOrder.value = 'asc'
+  }
 }
 
 // 根據 selectedBookSellers 產生排序後的清單
@@ -87,10 +95,13 @@ const sortedProductList = computed(() => {
     list.sort((a, b) => {
       let valA = a[currentSortField.value]
       let valB = b[currentSortField.value]
+      
+      // 處理 null 或 undefined
+      if (valA === null || valA === undefined) valA = ''
+      if (valB === null || valB === undefined) valB = ''
 
-      // 簡單的從小到大排序
-      if (valA > valB) return 1
-      if (valA < valB) return -1
+      if (valA > valB) return currentSortOrder.value === 'asc' ? 1 : -1
+      if (valA < valB) return currentSortOrder.value === 'asc' ? -1 : 1
       return 0
     })
   }
@@ -318,15 +329,31 @@ defineExpose({
               <tr>
                 <th>賣家</th>
                 <th @click="setSort('condition')" style="cursor: pointer;">
-                  書況等級 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'condition', 'text-secondary': currentSortField !== 'condition'}"></i>
+                  書況等級 
+                  <i class="bi" 
+                     :class="{
+                       'bi-caret-up-fill': currentSortField === 'condition' && currentSortOrder === 'asc',
+                       'bi-caret-down-fill': currentSortField === 'condition' && currentSortOrder === 'desc',
+                       'bi-caret-up': currentSortField !== 'condition'
+                     }"
+                     :style="{ color: currentSortField === 'condition' ? '#8da399' : '#ccc' }">
+                  </i>
                 </th>
                 <th>筆記狀況</th>
                 <th>賣家備註</th>
-                <th @click="setSort('createdAt')" style="cursor: pointer;">
-                  上架日期 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'createdAt', 'text-secondary': currentSortField !== 'createdAt'}"></i>
+                <th>
+                  上架日期
                 </th>
                 <th @click="setSort('price')" style="cursor: pointer;">
-                  價格 <i class="bi bi-caret-up-fill" :class="{'text-primary': currentSortField === 'price', 'text-secondary': currentSortField !== 'price'}"></i>
+                  價格 
+                  <i class="bi" 
+                     :class="{
+                       'bi-caret-up-fill': currentSortField === 'price' && currentSortOrder === 'asc',
+                       'bi-caret-down-fill': currentSortField === 'price' && currentSortOrder === 'desc',
+                       'bi-caret-up': currentSortField !== 'price'
+                     }"
+                     :style="{ color: currentSortField === 'price' ? '#8da399' : '#ccc' }">
+                  </i>
                 </th>
                 <th>商品實拍</th>
                 <th>操作</th>
@@ -360,8 +387,13 @@ defineExpose({
                           :disabled="injectedUserId && product.sellerId === injectedUserId"
                           :class="{ 'btn-secondary': injectedUserId && product.sellerId === injectedUserId }"
                           @click="addToCart(product)">
-                    <i class="bi bi-cart4"></i> 
-                    {{ injectedUserId && product.sellerId === injectedUserId ? '本人商品' : '加入購物車' }}
+                    <template v-if="injectedUserId && product.sellerId === injectedUserId">
+                      本人商品 <i class="bi bi-cart-x"></i>
+                    </template>
+
+                    <template v-else>
+                      加入 <i class="bi bi-cart4"></i>
+                    </template>
                   </button>
                 </td>
               </tr>

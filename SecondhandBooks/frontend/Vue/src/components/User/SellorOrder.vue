@@ -61,7 +61,7 @@
               
               <!-- Buyer Info -->
               <div class="px-3 py-1 border-bottom small">
-                <span class="fw-bold">訂單用戶：</span> {{ order.user }}
+                <span class="fw-bold">買家用戶：</span> {{ order.user }}
               </div>
 
               <!-- Order Items -->

@@ -81,7 +81,7 @@
         <!-- 新增日期 & 數量 -->
         <div class="row mb-3">
           <div class="col">
-            <label class="form-label">上架日期：</label>
+            <label class="form-label">新增日期：</label>
             <input type="date" class="form-control" v-model="form.uploadTime" disabled />
           </div>
           <div class="col">

@@ -1,6 +1,6 @@
 <template>
   <div class="container mt-4">
-    <h2 class="text-center fw-bold mb-4">我的訂單</h2>
+    <h2 class="text-center fw-bold mb-4">訂單查詢</h2>
 
     <!-- 切換按鈕 -->
     <div class="mb-4 d-flex gap-2 justify-content-center">
