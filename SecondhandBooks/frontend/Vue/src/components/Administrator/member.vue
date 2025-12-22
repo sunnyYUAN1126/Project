@@ -33,13 +33,19 @@
               <tr v-if="users.length === 0">
                 <td colspan="10" class="text-center py-4 text-muted">查無會員資料</td>
               </tr>
-              <tr v-for="user in users" :key="user.user_id">
+              <tr v-for="user in users" :key="user.user_id" :class="{ 'table-danger': isOldMember(user.created_at) }">
                 <td>{{ user.user_id }}</td>
                 <td>
-                  <img :src="user.user_picture || 'https://via.placeholder.com/40'" 
-                       class="rounded-circle object-fit-cover border" 
-                       width="40" height="40" 
+                  <img v-if="user.user_picture" 
+                       :src="user.user_picture" 
+                       class="border" 
+                       style="width: 40px !important; height: 40px !important; min-width: 40px !important; border-radius: 50% !important; object-fit: cover !important;"
                        alt="User">
+                  <div v-else 
+                       class="rounded-circle border d-flex justify-content-center align-items-center" 
+                       style="width: 40px; height: 40px; min-width: 40px; background-color: #e9ecef; color: #6c757d;">
+                    <i class="bi bi-person-fill fs-4"></i>
+                  </div>
                 </td>
                 <td class="fw-bold text-primary">{{ user.account }}</td>
                 <td>{{ user.student_id }}</td>
@@ -196,6 +202,18 @@ const confirmDelete = async (user) => {
 const formatDate = (isoString) => {
   if (!isoString) return '-';
   return new Date(isoString).toLocaleDateString();
+};
+
+const isOldMember = (isoString) => {
+  if (!isoString) return false;
+  const createdDate = new Date(isoString);
+  const today = new Date();
+  let age = today.getFullYear() - createdDate.getFullYear();
+  const m = today.getMonth() - createdDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < createdDate.getDate())) {
+    age--;
+  }
+  return age > 5;
 };
 
 onMounted(() => {
