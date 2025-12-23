@@ -72,7 +72,8 @@
             </td>
             <td>
               <button 
-                class="btn btn-danger btn-sm" 
+                class="btn btn-sm" 
+                :class="item.shelfStatus === '交易中' ? 'btn-secondary' : 'btn-danger'"
                 @click="deleteBook(index, item.id)"
                 :disabled="item.shelfStatus === '交易中'"
                 :title="item.shelfStatus === '交易中' ? '交易中無法刪除' : '刪除此書籍'"
