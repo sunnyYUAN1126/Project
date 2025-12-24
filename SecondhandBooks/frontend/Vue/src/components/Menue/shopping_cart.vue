@@ -220,7 +220,7 @@ async function confirmCheckout() {
         <h2>訂單確認</h2>
 
         <div v-for="(items, seller) in groupedCart" :key="seller" class="seller-block mb-4 p-3 border rounded">
-          <h3 class="h5 mb-3 border-bottom pb-2">{{ seller }}</h3>
+          <h3 class="h5 mb-3 border-bottom pb-2">賣家:{{ seller }}</h3>
 
           <div v-for="(item, i) in items" :key="item.cartId" class="cart-item mb-2">
             <div class="d-flex justify-content-between">
