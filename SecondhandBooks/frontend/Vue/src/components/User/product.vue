@@ -64,11 +64,11 @@
             </td>
             <td>{{ item.adminNote }}</td>
             <td :class="{ 
-              'text-success fw-bold': item.adminStatus === '審核通過', 
-              'text-warning fw-bold': item.adminStatus === '待審核', 
-              'text-danger fw-bold': item.adminStatus !== '審核通過' && item.adminStatus !== '待審核' 
+              'text-success fw-bold': item.shelfStatus === '上架', 
+              'text-warning fw-bold': item.shelfStatus === '交易中', 
+              'text-secondary fw-bold': item.shelfStatus === '已售出' || item.shelfStatus === '下架'
             }">
-              {{ item.adminStatus === "審核通過" ? "上架" : "下架" }}
+              {{ item.shelfStatus }}
             </td>
             <td>
               <button 
