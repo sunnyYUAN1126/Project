@@ -91,6 +91,13 @@ const sortedProductList = computed(() => {
   // 複製一份陣列以免改動到原始資料
   const list = selectedBookSellers.value.slice()
   
+  // 書況對應數值表 (一成 ~ 九成, 全新)
+  const conditionMap = {
+    '一成': 1, '二成': 2, '三成': 3,
+    '四成': 4, '五成': 5, '六成': 6,
+    '七成': 7, '八成': 8, '九成': 9
+  };
+
   if (currentSortField.value) {
     list.sort((a, b) => {
       let valA = a[currentSortField.value]
@@ -100,6 +107,10 @@ const sortedProductList = computed(() => {
       if (currentSortField.value === 'price') {
         valA = Number(valA)
         valB = Number(valB)
+      } else if (currentSortField.value === 'condition') {
+        // 針對書況，使用 mapping 轉成數字
+        valA = conditionMap[valA] || 0
+        valB = conditionMap[valB] || 0
       } else {
         // 其他欄位處理 null 或 undefined
         if (valA === null || valA === undefined) valA = ''
@@ -369,7 +380,7 @@ defineExpose({
             <tbody>
               <tr v-for="(product, index) in sortedProductList" :key="product.productId">
                 <td>{{ product.sellerName }}</td>
-                <td><span class="badge bg-info text-dark">{{ product.condition }}</span></td>
+                <td><span class="badge bg-info text-dark">{{ product.condition }}新</span></td>
                 <td>{{ product.status }}</td>
                 <td style="max-width: 200px; white-space: pre-wrap;">{{ product.note || '無' }}</td>
                 <td>{{ product.createdAt ? new Date(product.createdAt).toLocaleDateString() : 'N/A' }}</td>
