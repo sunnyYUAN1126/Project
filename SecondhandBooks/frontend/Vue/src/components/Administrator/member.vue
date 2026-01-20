@@ -130,7 +130,7 @@ const fetchUsers = async () => {
     if (searchKeyword.value.trim()) {
       url += `?search=${encodeURIComponent(searchKeyword.value.trim())}`;
     }
-    const response = await fetch(url);
+    const response = await fetch(url, { credentials: 'include' });
     if (response.ok) {
       users.value = await response.json();
     } else {
@@ -158,6 +158,7 @@ const updateUser = async () => {
     const response = await fetch(`${API_BASE_URL}/${editingUser.value.user_id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({
         studentId: editingUser.value.student_id,
         department: editingUser.value.department,
@@ -184,7 +185,8 @@ const confirmDelete = async (user) => {
   
   try {
     const response = await fetch(`${API_BASE_URL}/${user.user_id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      credentials: 'include'
     });
     
     if (response.ok) {

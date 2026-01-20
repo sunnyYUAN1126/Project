@@ -26,7 +26,7 @@ public class BookService {
      * Get books by category (or all if category is null/empty).
      * Sorts "上架" items first.
      */
-    public List<Book> getBooks(String category) {
+    public List<com.book.dto.BookPublicDTO> getBooks(String category) {
         List<Book> books;
         if (category == null || category.trim().isEmpty() || "ALL".equalsIgnoreCase(category)) {
             books = bookRepository.findAll();
@@ -39,7 +39,30 @@ public class BookService {
         return books.stream()
                 .sorted(Comparator.comparing((Book b) -> "上架".equals(b.getShelfStatus()) ? 0 : 1)
                         .thenComparing(Book::getCreatedAt, Comparator.reverseOrder()))
+                .map(this::convertToPublicDTO)
                 .collect(Collectors.toList());
+    }
+
+    private com.book.dto.BookPublicDTO convertToPublicDTO(Book book) {
+        com.book.dto.BookPublicDTO dto = new com.book.dto.BookPublicDTO();
+        dto.setProductId(book.getProductId());
+        dto.setSellerId(book.getSellerId());
+        dto.setIsbn(book.getIsbn());
+        dto.setName(book.getName());
+        dto.setCategory(book.getCategory());
+        dto.setAuthor(book.getAuthor());
+        dto.setPublisher(book.getPublisher());
+        dto.setProductNew(book.getProductNew());
+        dto.setProductClassNote(book.getProductClassNote());
+        dto.setProductNote(book.getProductNote());
+        dto.setPrice(book.getPrice());
+        dto.setStock(book.getStock());
+        dto.setShelfStatus(book.getShelfStatus());
+        dto.setCreatedAt(book.getCreatedAt());
+        dto.setUpdatedAt(book.getUpdatedAt());
+        dto.setImages(book.getImages()); // ProductImage is safe? Let's check. Yes, just url and sortOrder.
+        // adminReview and adminNote are EXCLUDED
+        return dto;
     }
 
     /**

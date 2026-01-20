@@ -20,6 +20,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private com.book.service.AuthService authService;
+
     // === 註冊 API ===
     // === 註冊 API ===
     @PostMapping("/register")
@@ -88,7 +91,13 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<java.util.List<Map<String, Object>>> getUsers(
-            @RequestParam(name = "search", required = false) String search) {
+            @RequestParam(name = "search", required = false) String search, HttpSession session) {
+
+        try {
+            authService.validateAdmin(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
+        }
 
         java.util.List<User> users = userService.searchUsers(search);
 
@@ -97,7 +106,7 @@ public class UserController {
             Map<String, Object> map = new HashMap<>();
             map.put("user_id", u.getUserId());
             map.put("account", u.getAccount());
-            map.put("password", u.getPassword()); // As requested, though usually unsafe
+            // map.put("password", u.getPassword()); // REMOVED PASSWORD for security
             map.put("student_id", u.getStudentId());
             map.put("department", u.getDepartment());
             map.put("role", u.getRole());
@@ -117,7 +126,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody User user,
+            HttpSession session) {
+        try {
+            authService.validateAdmin(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(Map.of("message", e.getReason()));
+        }
+
         String result = userService.updateUser(id, user);
         if ("更新成功".equals(result)) {
             return ResponseEntity.ok(Map.of("message", result));
@@ -127,7 +143,13 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id, HttpSession session) {
+        try {
+            authService.validateAdmin(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(Map.of("message", e.getReason()));
+        }
+
         String result = userService.deleteUser(id);
         if ("刪除成功".equals(result)) {
             return ResponseEntity.ok(Map.of("message", result));

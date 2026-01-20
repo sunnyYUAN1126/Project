@@ -1,6 +1,5 @@
 package com.book.controller;
 
-import com.book.model.Book;
 import com.book.service.AuthService;
 import com.book.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +24,9 @@ public class BookController {
     private AuthService authService;
 
     @GetMapping
-    public ResponseEntity<List<Book>> getBooks(@RequestParam(name = "category", required = false) String category) {
-        List<Book> books = bookService.getBooks(category);
+    public ResponseEntity<List<com.book.dto.BookPublicDTO>> getBooks(
+            @RequestParam(name = "category", required = false) String category) {
+        List<com.book.dto.BookPublicDTO> books = bookService.getBooks(category);
         return ResponseEntity.ok(books);
     }
 
