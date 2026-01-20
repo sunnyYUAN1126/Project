@@ -8,6 +8,7 @@ import com.book.model.Order;
 import com.book.model.OrderItem;
 import com.book.repository.BookRepository;
 import com.book.service.OrderService;
+import com.book.service.AuthService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,19 +24,23 @@ public class OrderController {
     private final OrderService orderService;
     private final BookRepository bookRepository;
     private final com.book.repository.UserRepository userRepository;
+    private final AuthService authService;
 
     public OrderController(OrderService orderService, BookRepository bookRepository,
-            com.book.repository.UserRepository userRepository) {
+            com.book.repository.UserRepository userRepository, AuthService authService) {
         this.orderService = orderService;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.authService = authService;
     }
 
     @PostMapping("/checkout")
     public ResponseEntity<?> checkout(@RequestBody OrderRequest request, HttpSession session) {
-        Long userId = (Long) session.getAttribute("user_id");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        Long userId;
+        try {
+            userId = authService.getCurrentUserId(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
 
         try {
@@ -48,9 +53,11 @@ public class OrderController {
 
     @PostMapping("/{orderId}/complete")
     public ResponseEntity<?> complete(@PathVariable Long orderId, HttpSession session) {
-        Long userId = (Long) session.getAttribute("user_id");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        Long userId;
+        try {
+            userId = authService.getCurrentUserId(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
 
         try {
@@ -68,9 +75,11 @@ public class OrderController {
 
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<?> cancel(@PathVariable Long orderId, HttpSession session) {
-        Long userId = (Long) session.getAttribute("user_id");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        Long userId;
+        try {
+            userId = authService.getCurrentUserId(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
 
         try {
@@ -84,9 +93,11 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<?> listOrders(HttpSession session) {
-        Long userId = (Long) session.getAttribute("user_id");
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in");
+        Long userId;
+        try {
+            userId = authService.getCurrentUserId(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
 
         List<Order> buyingOrders = orderService.getOrdersByBuyer(userId);

@@ -1,6 +1,7 @@
 package com.book.controller;
 
 import com.book.model.Book;
+import com.book.service.AuthService;
 import com.book.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,9 @@ public class BookController {
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private AuthService authService;
 
     @GetMapping
     public ResponseEntity<List<Book>> getBooks(@RequestParam(name = "category", required = false) String category) {
@@ -56,11 +60,13 @@ public class BookController {
             @RequestParam(value = "files", required = false) List<MultipartFile> files,
             HttpSession session) {
 
-        Object userIdObj = session.getAttribute("user_id");
-        if (userIdObj == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "請先登入"));
+        // Use AuthService to validate login and get ID
+        Long userId;
+        try {
+            userId = authService.getCurrentUserId(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(Map.of("message", e.getReason()));
         }
-        Long userId = Long.valueOf(userIdObj.toString());
 
         try {
             String result = bookService.addBook(request, files, userId);
@@ -77,14 +83,12 @@ public class BookController {
 
     @GetMapping("/pending")
     public ResponseEntity<List<com.book.dto.BookReviewDTO>> getPendingBooks(HttpSession session) {
-        // Basic check for admin role (in a real app, use Spring Security)
-        // For now, checks if user is logged in. Better: check DB for role "管理員"
-        // But session only has user_id, need to fetch user or trust session if we
-        // stored role.
-        // Simplified: assume frontend protects this route, or we check user_id.
-        // Let's at least check login.
-        if (session.getAttribute("user_id") == null) {
-            return ResponseEntity.status(401).build();
+        // Check for Admin role
+        try {
+            authService.validateAdmin(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            // Return 401 or 403 based on exception
+            return ResponseEntity.status(e.getStatusCode()).build();
         }
         return ResponseEntity.ok(bookService.getPendingBooks());
     }
@@ -95,8 +99,10 @@ public class BookController {
             @RequestBody Map<String, Object> payload,
             HttpSession session) {
 
-        if (session.getAttribute("user_id") == null) {
-            return ResponseEntity.status(401).body("請先登入");
+        try {
+            authService.validateAdmin(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
 
         boolean approved = (boolean) payload.get("approved");
@@ -108,18 +114,22 @@ public class BookController {
 
     @GetMapping("/my-books")
     public ResponseEntity<List<com.book.dto.BookListingDTO>> getMyBooks(HttpSession session) {
-        Long userId = (Long) session.getAttribute("user_id");
-        if (userId == null) {
-            return ResponseEntity.status(401).build();
+        Long userId;
+        try {
+            userId = authService.getCurrentUserId(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).build();
         }
         return ResponseEntity.ok(bookService.getMyBooks(userId));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteBook(@PathVariable Long id, HttpSession session) {
-        Long userId = (Long) session.getAttribute("user_id");
-        if (userId == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "請先登入"));
+        Long userId;
+        try {
+            userId = authService.getCurrentUserId(session);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(Map.of("message", e.getReason()));
         }
 
         String result = bookService.deleteBook(id, userId);
